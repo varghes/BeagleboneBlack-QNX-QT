@@ -58,4 +58,20 @@ QT Debugging from IDE
 Note :first QT application should be accompanied with '-qws'
  qtdemo -qws &
  
+Uboot /Flashing:
+
+You can download the files from QNX site / uploaded here for convenience 
+           
+          https://drive.google.com/open?id=0B02sL8YIqsjCWlpRWVVTVWpkZ00
+          
+          use TI_SDCard_boot_utility_v1_0.exe to copy the MLO file , on windows Run as administrator 
+ 
+ Screen Resolution :
+ 
+          Screen resolution set to 800x480 , To edit this go to bsp-ti-beaglebone-src\src\hardware\devg\omapl1xx\omapl1xx.h
+          
+ 
+
+
+ 
 
