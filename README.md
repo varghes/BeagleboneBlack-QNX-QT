@@ -50,6 +50,10 @@ QT Debugging from IDE
          category  "Extra library  "  click "Add"     and type
          QtGui
          QtCore
+         
+     f.  debug configuration-> Environment variable
+          TMPDIR=/ramdisk
+          XDG_CONFIG_HOME=/ramdisk
 
      f.click "apply "  , click "ok"   , Now "build project" can compile the QT source code.
 
