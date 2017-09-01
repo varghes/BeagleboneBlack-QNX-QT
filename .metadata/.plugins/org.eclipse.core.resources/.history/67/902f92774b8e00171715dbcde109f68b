@@ -1,0 +1,768 @@
+###########################################################################
+##
+## QNX Neutrino trunk on the Texas Instruments BeagleBone Board
+##
+###########################################################################
+##
+## SUPPORTED DEVICES:
+##
+## SERIAL:   OMAP UART
+##
+##  - For detailed instructions on the default example configuration for
+##    these devices see the "CONFIGURING ON-BOARD SUPPORTED HARDWARE"
+##    section below the build script section, or refer to the BSP docs.
+##  - Tip: Each sub-section which relates to a particular device is marked
+##         with its tag (ex. SERIAL). You can use the search features of
+##         your editor to quickly find and add or remove support for
+##         these devices.
+##  - For details on how build files work, please refer to the help
+##    documentation for "mkifs" in the QNX Neutrino "Utilities Reference".
+## 
+###########################################################################
+##                       
+##                        Varghese Alphonse 
+##
+## NOTES:   
+## officially Photon  is no longer supported on ArmV7 , yes photon windows  is working 
+## but there are major bugs in it . 2 bugs i noticed .1. mouse dragg 2. phcalc is crashing 
+## tried fixing the mouse issue by adding hwcursor work around , but crashing 
+## issue is beyond my scope( some trouble with events )
+##
+##  Devices configured in PinMap
+##  LCD
+##  SPI - for touch
+##
+###########################################################################
+
+###########################################################################
+## START OF BUILD SCRIPT
+###########################################################################
+
+[image=0x81000000]
+#[+compress]
+[virtual=armle-v7,raw] .bootstrap = {
+	
+	#######################################################################
+	## This BSP supports three board variants with the same startup.  Each
+	## variant uses a different configuration to enable PATA.  Here is
+	## a breakdown of the different variants and how to enable PATA with
+	## them:
+	##
+	## 1.       Mistral EVM Alpha with PG1.x silicon -- use "-p" to enable
+	##		 PATA (and set SW1 on the adapter board to 01)
+	##
+	## 2.       Mistral EVM Beta with PG1.x silicon -- use "-p" to enable
+	##		 PATA (and set SW1 on the adapter board to 01)
+	##
+	## 3.       Spectrum Digital EVM Beta with PG2.1 silicon -- use "-g"
+	##		to enable PATA
+	##
+	## By default (no options), PATA support is disabled for all boards.
+	##
+	## NOTE: The "-p" and "-g" options are not mutally exclusive - only
+	## pass the option which is specific to the board being used.
+	#######################################################################
+	## Use "-W" to enable WiFi (WL128x) on Spectrum Digital B Board
+	#######################################################################
+    startup-beaglebone  -vvvvvvv 
+	#######################################################################
+	## PATH set here is the *safe* path for executables.
+	## LD_LIBRARY_PATH set here is the *safe* path for libraries.
+	##     i.e. These are the paths searched by setuid/setgid binaries.
+	##          (confstr(_CS_PATH...) and confstr(_CS_LIBPATH...))
+	#######################################################################
+	PATH=:/proc/boot:/bin:/usr/bin:/usr/photon/bin LD_LIBRARY_PATH=:/proc/boot:/lib:/usr/lib:/lib/dll PHOTON_PATH=/usr/photon procnto-instr -vvvvvvv
+   #PATH=:/proc/boot:/bin:/usr/bin:/usr/photon/bin LD_LIBRARY_PATH=:/proc/boot:/lib:/usr/lib:/lib/dll PHOTON_PATH=/usr/photon procnto-v6-instr -vvvvvvv
+     
+}
+[+script] .script = {
+	# Initialise the console
+	procmgr_symlink ../../proc/boot/libc.so.3 /usr/lib/ldqnx.so.2
+
+	display_msg Welcome to QNX Neutrino 6.5.0 SP1 on the Texas Instruments BeagleBone (ARMv7 Cortex-A8 core) - Board
+
+	# Start some common servers
+	slogger
+	pipe
+
+	#######################################################################
+	## SERIAL driver
+	#######################################################################
+	devc-seromap -e -F -b115200 -c48000000/16 0x44E09000^2,72
+	waitfor /dev/ser1 4
+	reopen /dev/ser1
+	
+    #devc-seromap -e -F -b115200 -c48000000/16 0x48022000^2,73
+    #waitfor /dev/ser2 4
+ 
+	#######################################################################
+	## MMC/SD driver
+	#######################################################################
+	display_msg Starting MMC/SD driver...
+	# MMC 0 pio
+	#devb-mmcsd-jacinto5 cam blk automount=hd0t12:/fs/sd0 mmcsd verbose=5,pio,ioport=0x48060100,irq=64,ioport=0x49000000,dma=24,dma=25
+	# MMC 0 dma
+	devb-mmcsd-jacinto5 cam blk automount=hd0t12:/fs/sd0 mmcsd verbose=5,ioport=0x48060100,irq=64,ioport=0x49000000,dma=24,dma=25
+    waitfor /dev/hd0 4
+    mount -tdos /dev/hd0t6 /mnt # changes with card
+   
+
+
+	#######################################################################
+	## I2C driver
+	#######################################################################
+	display_msg starting I2C driver...
+	# Uncomment for /dev/i2c0
+	i2c-omap35xx-j5 -i 70 -p0x44E0B000 --u0
+	waitfor /dev/i2c0
+	# Uncomment for /dev/i2c1
+	i2c-omap35xx-j5 -i 71 -p0x4802A000 --u1
+	waitfor /dev/i2c1
+	# Uncomment for /dev/i2c2
+	i2c-omap35xx-j5 -i 30 -p0x4819C000 --u2
+	waitfor /dev/i2c2
+
+	#######################################################################
+	## Watchdog timer
+	#  -k    Kick time interval in milliseconds. (Default: 15000 ms)
+	#  -t    Timeout Period of watchdog timer in milliseconds. (Default: 2x the kicktime)
+	#######################################################################
+	display_msg starting WDT reset utility...
+    wdtkick
+	
+	#######################################################################
+	## Board id driver
+	#######################################################################
+	display_msg starting Board ID driver...
+	## Uncomment for board id
+	bdid-am335x
+	
+	#######################################################################
+	## RTC driver (TPS65910) utility
+	##  - It requires I2C driver
+	#######################################################################
+	display_msg Setting OS Clock from on-board RTC
+	rtc am335xrtc
+	
+	#######################################################################
+	## USB OTG Host Controller driver
+	## -
+	#######################################################################
+	display_msg Starting USB OTG Host driver...
+	io-usb -vvv -d dm816x-mg ioport=0x47401c00,irq=19
+	waitfor /dev/io-usb/io-usb 4
+    # USB Pen Drive  
+    #devb-umass cam pnp
+    #usb pendrive mount , some pendrives & usb sd cards  working
+    #mount -tdos /dev/hd0 /mmt
+    
+    
+    #devc-serusb -d did=0xda70，vid=0x0403  check if correct
+	#######################################################################
+	## SPI driver
+	## SPI 0 ioport 0x48030100 irq 65
+	## SPI 1 ioport 0x481a0100 irq 125
+	#######################################################################
+	display_msg Starting SPI driver...
+	#  SPI0
+	#spi-master -d am335x base=0x48030100,irq=65,edma=1,edmairq=529,edmachannel=17
+	#  SPI1
+	spi-master -d am335x base=0x481A0100,irq=125,edma=1,edmairq=555,edmachannel=43
+
+	#######################################################################
+    ## Network driver
+    #######################################################################
+    display_msg Starting network driver... 
+    io-pkt-v4-hc -dam335x deviceindex=0
+    waitfor /dev/socket
+	if_up -p -a dm0
+   
+   
+    #ifconfig dm0 10.150.224.93/16
+    ## or
+	display_msg Getting network address with DHCP...
+    dhcp.client -i dm0   
+    if_up -r 15 dm0      
+	ifconfig dm0 
+	
+	#static IP
+	#ifconfig dm0 192.168.0.3
+	#add net default: gateway 192.168.0.1
+    #netstat
+    #telnetd
+    #ping
+    #######################################################################
+    ## REMOTE_DEBUG (gdb or Momentics)
+    ##  - refer to the help documentation for the gdb, qconn and the IDE
+    ##    for more information on remote debugging
+    ##  - the commands shown require that NETWORK is enabled too
+    #######################################################################
+    display_msg starting devc-pty ...
+    devc-pty                    
+    waitfor /dev/ptyp0 4
+    waitfor /dev/socket 4
+    qconn port=8000
+
+	#######################################################################
+	## Leds driver
+	#######################################################################
+	display_msg starting leds driver...
+	dev-leds-beaglebone &
+    waitfor /dev/leds 4
+	
+	#######################################################################
+    ## INETD daemon
+    #######################################################################
+	display_msg Starting inetd daemon
+	inetd 
+	
+	
+	PHOTON=/dev/photon
+	PHOTON_PATH=/usr/photon
+	PHOTON_PATH2=/usr/photon
+	PHFONT=/dev/phfont
+	MMEDIA_MIDI_CFG=/etc/config/media/midi.cfg
+	
+    #QT RAM Disk 
+	devb-ram ram capacity = 8192 &
+	waitfor /dev/hd1  
+    dinit -q -h /dev/hd1t77
+    mount  /dev/hd1t77  /ramdisk
+	
+ 	
+    QWS_KEYBOARD=qnx
+    QWS_MOUSE_PROTO=qnx
+	#QWS_MOUSE_PROTO= qnx:/dev/devi/ touch0
+	
+	TMPDIR=/ramdisk
+	XDG_CONFIG_HOME=/ramdisk
+	QWS_DISPLAY=qnx
+	
+	#######################################################################
+	## These env variables are inherited by all the programs which follow
+	#######################################################################
+	SYSNAME=nto
+	TERM=qansi
+	HOME=/
+	PATH=:/proc/boot:/bin:/usr/bin:/opt/bin:/usr/photon/bin
+	LD_LIBRARY_PATH=:/proc/boot:/lib:/usr/lib:/lib/dll:/opt/lib
+	
+	#######################################################################
+    ## if you r using QT ,dont start photon & io-graphics ,phfont	
+    #######################################################################
+#	display_msg Starting photon...       
+#    Photon &
+#    waitfor /dev/photon 2
+     
+     display_msg Starting graphics driver
+	 io-display  -dvid=0,did=0 -v
+	 waitfor /dev/io-display 2
+	  
+#    display_msg Starting io-graphics...    
+#    io-graphics 
+
+#    display_msg waiting phfont...          
+#    waitfor /dev/phfont 2
+
+	io-hid -d usb -v &
+	mount -Tio-hid devh-usb.so
+	devi-hid -Pr -vvv mouse kbd  &  
+
+    #QT Apps
+	#qtdemo -qws &
+    #qt_v7_demo
+    
+    #Photon Apps
+    #pwm&
+    #phcalc
+
+    #gl apps
+    #egl-gears-lite
+
+#	[+session] sh &
+[+session] ksh &
+}
+
+
+# Redirect console messages
+[type=link] /bin/sh=/proc/boot/ksh
+[type=link] /dev/console=/dev/ser1
+[type=link] /tmp=/dev/shmem
+[type=link] /var/log=/tmp
+[type=link] /usr/tmp=/tmp
+
+# Shared libraries:
+# Programs require the runtime linker (ldqnx.so) to be at a fixed location
+
+libc.so
+libm.so
+
+###########################################################################
+## uncomment for BLOCK device 
+###########################################################################
+libcam.so
+io-blk.so
+cam-disk.so
+cam-cdrom.so
+fs-qnx6.so
+fs-qnx4.so
+fs-dos.so
+fs-udf.so
+fs-cd.so
+
+
+ gri-photon.so 
+###########################################################################
+## QT Library
+###########################################################################
+libQtGui.so.4
+libQtCore.so.4
+libQtNetwork.so.4
+libcpp.so.4
+libz.so.2
+libstdc++.so.6
+
+libhiddi.so.1
+devh-usb.so
+
+##########qtdemo dependency############
+libQtHelp.so.4
+libQtDeclarative.so.4
+libQtXml.so.4
+libQtSql.so.4
+libQtXmlPatterns.so.4
+libQtSvg.so.4
+libQtScript.so.4
+libQtCLucene.so.4
+
+##designer
+libQtDesignerComponents.so.4
+libQtDesigner.so.4
+
+##browser 
+libQtWebKit.so.4
+###########################################################################
+## uncomment for graphics driver
+###########################################################################
+devg-omapl1xx.so
+libGLES_CL.so
+libGLES_CM.so
+libffb.so
+libgf.so
+devg-soft3d-fixed.so
+libFF-T2K.so.2
+libm.so.2
+devg-soft3d.so
+
+
+###########################################################################
+## uncomment for USB driver
+###########################################################################
+[perms=+r,+x] devu-dm816x-mg.so
+libusbdi.so
+
+###########################################################################
+## uncomment for SPI driver
+###########################################################################
+spi-am335x.so
+
+###########################################################################
+## uncomment for DMA shared lib
+###########################################################################
+libdma-am335x.so
+
+###########################################################################
+## uncomment for NETWORKING
+###########################################################################
+[perms=+r,+x] devnp-am335x.so
+libsocket.so
+
+
+###########################################################################
+## uncomment for rcheck and mudflap support
+###########################################################################
+librcheck.so
+libmudflap.so.0
+libmudflapth.so.0
+
+
+[data=copy]
+
+# Executables
+[data=c]
+#######################################################################
+## SERIAL driver
+#######################################################################
+devc-seromap
+/bin/stty=stty
+
+###########################################################################
+## uncomment for SD driver
+###########################################################################
+devb-mmcsd-jacinto5
+
+#######################################################################
+## I2C driver
+#######################################################################
+i2c-omap35xx-j5
+bdid-am335x
+
+
+###########################################################################
+## RTC
+###########################################################################
+rtc
+date
+
+###########################################################################
+## uncomment for SPI driver
+###########################################################################
+[perms=+r,+x] spi-master
+
+###########################################################################
+## uncomment for LED driver
+###########################################################################
+dev-leds-beaglebone
+
+###########################################################################
+## uncomment for USB driver
+###########################################################################
+io-usb
+usb
+devb-umass
+
+io-hid
+devi-hid
+devu-kbd
+devu-mouse
+###########################################################################
+## uncomment for NETWORKING
+###########################################################################
+io-pkt-v4-hc
+ifconfig
+if_up
+nicinfo
+netstat
+ping
+route
+setkey
+dhcp.client
+
+#######################################################################
+## INPUT drivers
+#######################################################################
+devu-kbd
+devu-mouse
+
+###########################################################################
+## uncomment for WATCHDOG TIMER utility
+###########################################################################
+wdtkick
+
+###########################################################################
+## uncomment for REMOTE_DEBUG (gdb or Momentics)
+###########################################################################
+devc-pty
+qconn
+/usr/bin/pdebug=pdebug
+
+###########################################################################
+## uncomment for required network clients and services
+###########################################################################
+fs-cifs
+fs-nfs3
+ftp
+inetd
+/usr/sbin/telnetd=telnetd
+/usr/sbin/ftpd=ftpd
+/bin/login=login
+
+/etc/inetd.conf={
+#
+# Configuration file for inetd.
+#
+# To re-configure the running inetd process, edit this file, then
+# send the inetd process a SIGHUP.
+#
+#
+# Internet services syntax:
+#  <service_name> <socket_type> <proto> <flags> <user> <server_pathname> <args>
+#
+
+telnet     stream tcp nowait root  /usr/sbin/telnetd        in.telnetd 
+ftp        stream tcp nowait root  /usr/sbin/ftpd           in.ftpd -l 
+
+# IPv6 services.
+# The only difference with the above is "tcp6" instead of "tcp".
+# Be sure to enable both "tcp" and "tcp6" when you need service for
+# both IPv4/v6.
+#
+#telnet          stream  tcp6    nowait  root    /usr/sbin/telnetd    telnetd
+}
+
+/etc/passwd={
+root::0:0:Superuser:/:/bin/sh
+ftp:x:14:80:FTP User:/tmp: 
+}
+
+/etc/ftpusers={
+# list of users disallowed any ftp access.
+# read by ftpd(8). 
+}
+
+/etc/ftpd.conf={
+checkportcmd all
+classtype chroot CHROOT
+classtype guest GUEST
+classtype real REAL
+display none
+limit all -1 # unlimited connections
+maxtimeout all 7200 # 2 hours
+modify all
+motd all motd
+notify none
+passive all
+timeout all 900 # 15 minutes
+umask all 027
+upload all
+modify guest off
+umask guest 0707
+}
+ 
+/etc/services=${QNX_TARGET}/etc/services
+
+
+
+###########################################################################
+## Image Loading
+###########################################################################
+libimg.so
+# img_codec_bmp.so
+# img_codec_gif.so
+img_codec_jpg.so
+# img_codec_png.so
+# img_codec_sgi.so
+# img_codec_tga.so
+
+###########################################################################
+## Font loading
+###########################################################################
+/lib/dll/font/ttfFFcore.so = ${QNX_TARGET}/armle/lib/dll/font/ttfFFcore.so
+/lib/dll/font/PHFcore.so = ${QNX_TARGET}/armle/lib/dll/font/PHFcore.so
+/lib/dll/font/FCcore.so = ${QNX_TARGET}/armle/lib/dll/font/FCcore.so
+
+libFF-T2K.so
+libblkcache.so
+phfont.so
+libfont.so
+libgf.so   
+###########################################################################
+## Photon libs 
+###########################################################################
+libph.so
+libAp.so
+libphexlib.so 
+###########################################################################
+## io-graphics libs 
+###########################################################################
+libphrender.so
+libffb.so
+libdisputil.so
+libimg.so.1
+#shelf depend
+libecpp-ne.so.4
+
+
+##########################################################################
+## curses support (e.g. for more)
+##########################################################################
+#/etc/termcap=${QNX_TARGET}/etc/termcap
+/usr/lib/terminfo/a=${QNX_TARGET}/usr/lib/terminfo/a
+/usr/lib/terminfo/q=${QNX_TARGET}/usr/lib/terminfo/q
+/usr/lib/terminfo/v=${QNX_TARGET}/usr/lib/terminfo/v
+/usr/lib/terminfo/x=${QNX_TARGET}/usr/lib/terminfo/x
+
+###########################################################################
+## Graphics driver
+###########################################################################
+# Include Photon Binaries
+Photon
+/usr/photon/config/omapl1xx_hdmi.conf=omapl1xx_hdmi.conf
+/etc/system/config/img.conf=${QNX_TARGET}/etc/system/config/img.conf
+/etc/system/config/display.conf=display.conf
+io-display
+io-graphics
+
+# Include photon font files
+/usr/photon/font_repository/fontdir = {
+#;
+#; fontdir configuration file
+#;
+pcterm12,.phf,PC Terminal,12,,0000-00FF,Nf,6x12,13K
+phcursor,.phf,Photon Cursor,0,,E900-E921,Np,32x32,3K
+primasansmonobts,0@tt2009m_.ttf,PrimaSansMono BT,0,,0020-F002,f,79x170,109K
+}
+
+#/usr/photon/font_repository/fontext = ${QNX_TARGET}/usr/photon/font_repository/fontext
+/usr/photon/font_repository/fontext = {
+#;
+#; fontext configuration file
+#;
++normal = primasansmonobts, phcursor
+}
+
+#/usr/photon/font_repository/fontmap = ${QNX_TARGET}/usr/photon/font_repository/fontmap
+/usr/photon/font_repository/fontmap = {
+#;
+#; fontmap configuration file
+#;
+? = primasansmonobts
+}
+/usr/photon/config/coral.conf=${QNX_TARGET}/usr/photon/config/coral.conf
+
+/usr/photon/font_repository/fontopts = ${QNX_TARGET}/usr/photon/font_repository/fontopts
+/usr/photon/font_repository/pcterm12.phf = ${QNX_TARGET}/usr/photon/font_repository/pcterm12.phf
+/usr/photon/font_repository/pcterm14.phf = ${QNX_TARGET}/usr/photon/font_repository/pcterm14.phf
+/usr/photon/font_repository/pcterm20.phf = ${QNX_TARGET}/usr/photon/font_repository/pcterm20.phf
+/usr/photon/font_repository/phcursor.phf = ${QNX_TARGET}/usr/photon/font_repository/phcursor.phf
+/usr/photon/font_repository/tt2001m_.ttf = ${QNX_TARGET}/usr/photon/font_repository/tt2001m_.ttf
+/usr/photon/font_repository/tt2002m_.ttf = ${QNX_TARGET}/usr/photon/font_repository/tt2002m_.ttf
+/usr/photon/font_repository/tt2003m_.ttf = ${QNX_TARGET}/usr/photon/font_repository/tt2003m_.ttf
+/usr/photon/font_repository/tt2004m_.ttf = ${QNX_TARGET}/usr/photon/font_repository/tt2004m_.ttf
+/usr/photon/font_repository/tt2009m_.ttf = ${QNX_TARGET}/usr/photon/font_repository/tt2009m_.ttf
+/usr/photon/font_repository/tt2011m_.ttf = ${QNX_TARGET}/usr/photon/font_repository/tt2011m_.ttf
+
+# Include photon palette file
+/usr/photon/palette/default.pal = ${QNX_TARGET}/usr/photon/palette/default.pal
+
+# Include keyboard mapping file
+/usr/photon/keyboard/en_US_101.kbd = ${QNX_TARGET}/usr/photon/keyboard/en_US_101.kbd
+
+## example pwm and bkgdmgr config 
+/usr/photon/config/wm/wm.cfg = ${QNX_TARGET}/usr/photon/config/wm/wm.cfg
+/usr/photon/config/wm/wm.menu= ${QNX_TARGET}/usr/photon/config/wm/wm.menu 
+/usr/photon/config/crtc-settings= ${QNX_TARGET}/usr/photon/config/crtc-settings 
+/etc/system/config/crtc-settings= ${QNX_TARGET}/usr/photon/config/crtc-settings 
+
+#Shelf
+/etc/photon/shelf/shelf.cfg=${QNX_TARGET}/etc/photon/shelf/shelf.cfg
+
+# Include some photon apps (Photon apps must be included as raw) 
+[+raw perms=+x] pwm
+[+raw perms=+x] bkgdmgr
+[+raw perms=+x] qt_v7_demo
+[+raw perms=+x] browser
+[+raw perms=+x] qtdemo
+[+raw perms=+x] designer
+[+raw perms=+x] phcalc
+[+raw perms=+x] qmlviewer
+[+raw perms=+x] cEasy
+vsync
+
+##########################################################################
+## Graphics binaries
+###########################################################################
+
+vsync
+egl-gears-lite
+## allow pterm to save its configuration to RAM, if the user changes it.
+[type=link] /.ph/pterm = /dev/shmem
+
+## allow pwm and bkgdmgr to save their configuration to RAM, if the user changes it.
+[type=link] /.ph/wm = /dev/shmem 
+
+##pfm file manager
+[type=link] /.ph/pfm = /dev/shmem 
+
+#shelf
+[type=link] /.ph/shelf = /dev/shmem 
+
+/usr/photon/font_repository/tt0419m_.ttf=${QNX_TARGET}/usr/photon/font_repository/tt0419m_.ttf
+[search=../install/usr/share/backdrops]/usr/share/backdrops/1024x768/default.jpg=1024x768/default.jpg
+[search=../install/usr/share/backdrops]/usr/share/backdrops/1024x768/neutrino_02_1024x768.jpg=1024x768/neutrino_02_1024x768.jpg
+
+
+##########################################################################
+## Splash screen binary and support files (fonts & images)
+###########################################################################
+/usr/bin/Demo.qml=Demo.qml
+/usr/bin/Meter.qml=Meter.qml
+/usr/bin/images/arrow.png=arrow.png
+/usr/bin/images/arrow_base.png=arrow_base.png
+/usr/bin/images/meter_bottom.png=meter_bottom.png
+/usr/bin/images/meter_top.png=meter_top.png
+
+/usr/bin/cEasy=cEasy
+/usr/bin/content/images/easy0.png=easy0.png
+/usr/bin/content/images/easy1.png=easy1.png
+/usr/bin/content/images/easy2.png=easy2.png
+/usr/bin/content/easyQML.qml=easyQML.qml
+
+/usr/bin/qt_v7_demo=qt_v7_demo
+/usr/bin/phcalc=phcalc
+/usr/bin/browser=browser
+###########################################################################
+## uncomment for Graphics driver
+###########################################################################
+#sw-vsync
+
+io-display
+#/etc/system/config/omap35xx.conf=omap35xx.conf
+#/etc/system/config/display.conf={
+#device \{
+#       drivername=omap35xx
+#        vid=0
+#        did=0
+#       modeopts=/etc/system/config/omap35xx.conf
+#        display \{
+#              xres=720
+#              yres=400
+#              refresh=60
+#              pixel_format=rgb565
+#        \}
+#    \}
+#}
+
+
+###########################################################################
+## general commands
+###########################################################################
+cat
+ls
+ksh
+mount
+pipe
+pidin
+uname
+shutdown
+sleep
+slogger
+sloginfo
+slay
+umount
+mkdir
+rmdir
+mv
+cp
+rm
+on
+elvis
+df
+ln
+chmod
+more
+hostname
+use
+kill
+vi
+ldd
+## QT RAM DISK
+dinit
+devb-ram
+hidview
+
+
+
+###########################################################################
+## END OF BUILD SCRIPT
+###########################################################################

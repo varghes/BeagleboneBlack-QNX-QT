@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="PDOMSearchPage">
+		<item key="caseSensitive" value="false"/>
+		<item key="searchFlags" value="227191"/>
+		<list key="previousPatterns">
+			<item value="watchdog"/>
+			<item value="AM335X_CM_PER_L4LS_CLKACTIVITY_LCDC_GC"/>
+			<item value="LIDD_CTRL"/>
+			<item value="disp_mmap_device_memory"/>
+			<item value="tda998x_drm_to_panel"/>
+			<item value="drm_display_mode"/>
+			<item value="REG_CURPAGE"/>
+			<item value="REG_MAIN_CNTRL0"/>
+			<item value="REG_PLL_SERIAL_1"/>
+			<item value="REG_AUDIO_DIV"/>
+			<item value="REG_MUX_VP_VIP_OUT"/>
+			<item value="REG_ANA_GENERAL"/>
+			<item value="g_current_page"/>
+			<item value="REG"/>
+			<item value="DCMD_I2C_SENDRECV"/>
+			<item value="DCMD_I2C_SEND"/>
+			<item value="I2CWrite"/>
+			<item value="reg_read"/>
+			<item value="HDMI:Read"/>
+			<item value="CECWrite"/>
+			<item value="I2C_STATUS_ABORT"/>
+			<item value="am335x_i2c_xfer"/>
+			<item value="omap_wait_status"/>
+			<item value="I2C_ADDRFMT_7BIT"/>
+			<item value="bdid_read"/>
+			<item value="DCMD_I2C_SET_SLAVE_ADDR"/>
+		</list>
+	</section>
+	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration.internal">
+		<item key="size.width" value="639"/>
+		<item key="size.height" value="180"/>
+	</section>
+	<section name="org.eclipse.cdt.ui.text.hover.CMacroExpansionExploration">
+	</section>
+	<section name="completion_proposal_size">
+	</section>
+</section>

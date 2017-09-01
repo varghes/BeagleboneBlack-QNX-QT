@@ -1,0 +1,750 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse-cdt version="2.0"?>
+
+<cdtproject id="org.eclipse.cdt.make.core.make">
+<extension point="org.eclipse.cdt.core.BinaryParser" id="com.qnx.tools.ide.qde.core.QDEBynaryParser"/>
+<data>
+<item id="org.eclipse.cdt.core.pathentry">
+<pathentry kind="inc" path="" include="/home/mkisel/workspace2/FLASH_etfs/HEAD/etfs/public"/>
+<pathentry kind="src" path=""/>
+<pathentry kind="out" path=""/>
+<pathentry kind="con" path="org.eclipse.cdt.make.core.DISCOVERED_SCANNER_INFO"/>
+</item>
+<item id="cdt_indexer">
+<indexEnabled indexValue="true"/>
+<indexerProblemsEnabled indexProblemsValue="0"/>
+</item>
+<item id="org.eclipse.cdt.make.core.buildtargets">
+<buildTargets>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>test</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_2x32/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>intel_32bit</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_2x32/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel_32bit/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/MPC8540ADS_Rev_pilot/ppc">
+<buildCommand>make</buildCommand>
+<buildArguments>clean CHIP_VARIANT=intel</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/MPC8540ADS_Rev_pilot/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="intelSim" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>intel</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86/o-g">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>sram</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86/o-g">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/sh">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/sh">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/MPC8540ADS-Rev_pilot">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor/x86-g">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor/x86-g">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor/x86-g">
+<buildCommand>make</buildCommand>
+<buildTarget>test</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/fujitsu/x86/a">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/fujitsu/x86/a">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/hynix/x86/a">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/hynix/x86/a">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x16/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>clean CHIP_VARIANT=intel</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x16/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel_16bit">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/sh">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/sh">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_2x16/ppc">
+<buildCommand>make</buildCommand>
+<buildArguments>clean CHIP_VARIANT=intel</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel_16bit/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_8x8">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_2x16/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>clean CHIP_VARIANT=intel</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_2x16/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x8/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>intel_8bit</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel_8bit">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_4x16/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>clean CHIP_VARIANT=intel</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_4x16/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_4x8/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>intel_8bit</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/simnor">
+<buildCommand>make</buildCommand>
+<buildTarget>test</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/mips">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/mips">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/simnor">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/simnor">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/mips">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/mips">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/devf_generic/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/hynix/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/hynix/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel_hold">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/fujitsu/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/fujitsu/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x16/ppc">
+<buildCommand>make</buildCommand>
+<buildArguments>clean CHIP_VARIANT=intel</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x16/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/arm">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/arm">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="sram" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>sram</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>test</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel_8bit/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/fujitsu/x86/a-g">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/fujitsu/x86/a-g">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/MPC8540ADS-Rev_pilot/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/hynix/x86/a-g">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/hynix/x86/a-g">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/arm">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/arm">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash">
+<buildCommand>make</buildCommand>
+<buildTarget>test</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash_x2/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>sram</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash_x2/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash_x2/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>test</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_2x8/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>intel_8bit</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_4x16/ppc">
+<buildCommand>make</buildCommand>
+<buildArguments>clean CHIP_VARIANT=intel</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/amd">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/amd">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sharp/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_8x8/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>intel_8bit</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x8">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86/o">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86/o">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/devf-generic">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/ppc">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_2x8">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/sram/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x32/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>intel_32bit</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_1x32/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/intelSim_4x8">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash/x86/o.g">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/chip/intel/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/devf-generic/x86">
+<buildCommand>make</buildCommand>
+<buildArguments>-k clean</buildArguments>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="all" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash-x2/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>all</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="clean" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash-x2/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>clean</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+<target name="test" targetID="org.eclipse.cdt.make.MakeTargetBuilder" path="nor/boards/ramFlash-x2/x86">
+<buildCommand>make</buildCommand>
+<buildTarget>test</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>true</useDefaultCommand>
+</target>
+</buildTargets>
+</item>
+</data>
+</cdtproject>

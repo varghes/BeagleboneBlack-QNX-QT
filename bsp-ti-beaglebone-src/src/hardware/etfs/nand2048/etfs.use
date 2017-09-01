@@ -1,0 +1,24 @@
+%C options
+Options:
+ -a                     Update atime.
+ -b priority            Run background reclaim at this priority. Default: 8.
+ -B                     Do not run detach to background. Great for debugging.
+ -c nclusters           Set cache size. Default: 64 clusters.
+ -C 0|1                 Disable checking 0 - no crc or ecc  1 - no ecc.
+ -D driver_options      Pass options to driver. Pass -Duse to get list.
+ -e                     Erase the filesystem on startup.
+ -f numfiles            Set max number of files. Default: 4096.
+ -F num                 Defrag if average extent is less than num clusters
+ -I                     Perform internal integrity checks while running.
+ -L                     Do not perform ".lost+found" recovery at startup.
+ -m mountpoint          Set mountpoint. 
+ -o numattr             Set number of attributes to cache. Default: 16.
+ -r kbytes              Set size of raw partition /dev/etfs1. Default: 0.
+ -R reserve             Set percentage of filesystem to reserve. Default: 5%
+ -s num                 Set number of flash blocks to use as spares. Default: 4.
+ -S                     Use a fast sum instead of a CRC for data verification.
+ -t sec                 Set timer for background kick. Default: 5 sec.
+ -v                     Set verbosity. Each -v increases verbosity.
+ -V                     Request read verification on all writes.
+ -W erasediff           Set wear leveling span. Default: 50.
+ -x nextents            Cache this number of extent offsets. Default: 8.

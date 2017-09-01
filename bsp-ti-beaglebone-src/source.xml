@@ -1,0 +1,18 @@
+<!-- Unless otherwise specified, values/attributes are free-form strings -->
+    <!-- type is currently either BSP or SourceOnly -->
+<sourcePackage type="BSP" id="bsp-ti-beaglebone">
+    <title>ti-beaglebone</title>
+    <release>latest</release>
+    <maturity>Development Build</maturity>
+    <license>QDL and Apache II</license>
+    <startup>startup-beaglebone</startup>
+    <ipl></ipl>       
+    <description>This package contains the source and build files for targeting QNX/Neutrino on the TI BeagleBone board</description>
+    <vendor>QNX Software Systems</vendor>
+    <qnxTargetVersion>6.5.0</qnxTargetVersion>
+    <qnxTargetCPU variant="armle-v7">ARM</qnxTargetCPU>
+    <!-- type is currently only import, will be extended in the future. -->
+    <bsp type="import">
+		<import>src/hardware/startup/boards/beaglebone/build</import>
+    </bsp>
+</sourcePackage>

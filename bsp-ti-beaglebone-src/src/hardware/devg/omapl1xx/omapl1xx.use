@@ -1,0 +1,10 @@
+Graphics driver for the Internal LCD Raster controller on TI OMAPL1xx boards.
+
+The file "omapl1xx.conf" can be used to customize hardware-related
+settings for the devg-omapl1xx.so graphics driver.
+
+omapl1xx.conf contains comments which describe the various settings
+which may be configured.
+
+
+

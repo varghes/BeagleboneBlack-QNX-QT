@@ -1,0 +1,172 @@
+/*
+ * $QNXLicenseC:
+ * Copyright 2010, QNX Software Systems.
+ * Copyright 2017 Varghese Alphonse
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You
+ * may not reproduce, modify or distribute this software except in
+ * compliance with the License. You may obtain a copy of the License
+ * at: http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OF ANY KIND, either express or implied.
+ *
+ * This file may contain contributions from others, either as
+ * contributors under the License or as licensors under other terms.
+ * Please review this entire file for other proprietary rights or license
+ * notices, as well as the QNX Development Suite License Guide at
+ * http://licensing.qnx.com/license-guide/ for other information.
+ * $
+ */
+
+#ifndef __OMAPL1xx_H_INCLUDED
+#define __OMAPL1xx_H_INCLUDED
+
+#include <graphics/display.h>
+#include <graphics/disputil.h>
+#include <graphics/ffb.h>
+#include <graphics/mode.h>
+#include <graphics/vbios.h>
+#include <graphics/vesa.h>
+#include <string.h>
+#include <sys/slog.h>
+#include <sys/slogcodes.h>
+
+
+
+#define IMAGE_DISPLAY_PA				0x8D000000
+#define lptr(x) (uint32_t volatile *)(((unsigned char volatile *)omapl1xx->lregptr)+x)
+
+
+#define OMAPL1xx_LCD_BASE				0x4830E000
+#define OMAPL1xx_LCD_SIZE				0x1000
+
+/*    Change the panel size here
+ * Resolution change has to be done in 4 files
+ * 1. omap1xx.h i.e below  OMAPL1xx_LCD_XRES,OMAPL1xx_LCD_YRES
+ * 2. hdmi.c mode=&drm_800x480; //mode=&drm_1024x768;
+ * 3. bsp-ti-beaglebone-src\prebuilt\armle-v7\sbin\display.conf
+ * 4. bsp-ti-beaglebone-src\prebuilt\armle-v7\sbin\omapl1xx_hdmi.conf
+ */
+#define OMAPL1xx_LCD_XRES				800
+#define OMAPL1xx_LCD_YRES				480
+//#define OMAPL1xx_LCD_XRES				1024
+//#define OMAPL1xx_LCD_YRES				768
+#define LCD_DFT_FRAMERATE                60
+
+
+
+typedef struct {
+	uint32_t		offset;
+	int				stride;
+	unsigned		bpp;
+	unsigned		layer_format;	
+	uint32_t		mode;
+	disp_point_t	src1;
+	disp_point_t	src2;
+	disp_point_t	dst1;
+	disp_point_t	dst2;
+	disp_color_t	transp;
+} layer_info;
+
+#define MAX_STRLEN 50
+
+#define HDMI_CABLE_CONNECTED		1
+#define HDMI_CABLE_NOTCONNECTED		0
+
+typedef struct _am335x_hdmi {
+	unsigned			reglen;
+	uintptr_t			regbase;
+	unsigned			physbase;
+
+	char				i2c_dev[MAX_STRLEN];
+	int					i2c_fd;
+	int					cable_state;
+	int					hdmi_cap;
+
+	int					chid;
+	int					tid;
+	int					coid;
+
+	unsigned char		devid[4];
+
+} am335x_hdmi_t;
+
+/*
+ * Omapl1xx private state
+ */
+typedef struct omapl1xx_context {
+	disp_adapter_t	*adapter;
+	unsigned char	*vidptr;		/* GPU virtual address */
+	unsigned 		vidsize;
+	unsigned 		vidbase;
+
+	uint32_t		*lregptr;
+	int				free_context;
+	unsigned		vsync_counter;
+
+
+	/* Internal lcd controller */
+	int				hfp, hbp, hsw, ppl;
+	int				vfp, vbp, vsw, lpp;
+	int				sync_ctrl, sync_edge;
+	int				ivs;
+	int				ihs;
+	int				ipc;
+	int				bias;
+	int				acb;
+	int				acbi;
+	int				pcd;
+	int				type;
+	int				lr;
+	int				tb;
+	int				mode3;
+	int				dith;
+	int				display;
+	int				lcd_xres;
+	int				lcd_yres;
+
+	/* i2c tlc59108 */
+	int				fd;
+	int				i2c_address;
+
+	/* HDMI interface context */
+	am335x_hdmi_t	*hdmi_dev;
+
+	int				 err;
+	int				 refresh;
+	int				 pixel_format;
+
+
+
+    short           	width;
+    short           	height;
+
+
+} omapl1xx_context_t;
+
+void omapl1xx_module_info(disp_adapter_t *adp, disp_module_info_t *info);
+int get_config_data(omapl1xx_context_t *p_ctx, const char *filename);
+
+/* Mode switcher (layer control) */
+int omapl1xx_layer_query(disp_adapter_t *adapter, int dispno, int layer_idx, int fmt_index, disp_layer_query_t * info);
+int omapl1xx_layer_enable(disp_adapter_t *adapter, int dispno, int layer_idx);
+int omapl1xx_layer_disable(disp_adapter_t *adapter, int dispno, int layer_idx);
+int omapl1xx_layer_set_surface(disp_adapter_t *adapter, int dispno, int layer_idx, unsigned layer_format, disp_surface_t *surf[]);
+int omapl1xx_layer_set_source_viewport(disp_adapter_t *adapter, int dispno, int layer_idx, int x1, int y1, int x2, int y2);
+int omapl1xx_layer_set_dest_viewport(disp_adapter_t *adapter, int dispno, int layer_idx, int x1, int y1, int x2, int y2);
+int omapl1xx_layer_set_blending(disp_adapter_t *adapter, int dispno, int layer_idx, unsigned alpha_mode, int m1, int m2);
+int omapl1xx_layer_set_chromakey(disp_adapter_t *adapter, int dispno, int layer_idx, unsigned chroma_mode,
+	disp_color_t color0, disp_color_t color1, disp_color_t mask);
+int omapl1xx_layer_set_flags(disp_adapter_t *adapter, int dispno, int layer_idx, unsigned flag_mask, unsigned flag_values);
+void omapl1xx_layer_update_begin(disp_adapter_t *adapter, int dispno, uint64_t layer_mask);
+void omapl1xx_layer_update_end(disp_adapter_t *adapter, int dispno, uint64_t layer_mask, int wait_vsync);
+void omapl1xx_layer_reset(disp_adapter_t *adapter, int dispno, int layer_idx);
+int omapl1xx_layer_set_alpha_map(disp_adapter_t *adapter, int dispno, int layer_idx, disp_surface_t *map);
+
+/* ISR functions */
+inline int isr_setup(omapl1xx_context_t *omapl1xx);
+inline void isr_cleanup(omapl1xx_context_t *omapl1xx);
+
+#endif /* _OMAPL1xx_H_ */

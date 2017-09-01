@@ -1,0 +1,46 @@
+%C [general_opts] protocol* [protocol_opts]* device* [device_opts]*
+
+%C : AM335x EVM resistive touchscreen Input Manager for Photon
+
+
+General options:
+ -d device               (default /dev/photon | PHOTON env var)
+ -g input group          (default 1)
+ -v increment verbosity  (default 0)
+ -l list                 List the internal modules.  Modules are listed in
+                         the following format:
+
+                           module name | date last compiled | revision | class
+                           where: class is comprised of (D)evice and/or 
+                                  (P)rotocol and/or (F)ilter
+
+
+protocol modules and their options:
+
+ pro0              pro0 protocol
+  -xval            Set the display resolution x dimension the touschscreen is
+                   to be used with (Default 800).
+  -yval            Set the display resolution y dimension the touschscreen is
+                   to be used with (Default 480).
+  -h[0|1]          Reverse the touchscreen reading in the x dimension (Default 0).
+  -v[0|1]          Reverse the touchscreen reading in the y dimension (Default 0).
+                   
+device modules and their options:
+
+ dev0              dev0 Device
+  -bbaseaddr       Base address for the touchscreen registers (Default 0x44E0D000)
+  -iirq            IRQ for sample device (Default 16)
+  -dsampledelay    Sampling delay in TSCADC clock cycles (Default 0)
+  -mmoscfreq       Master oscillator frequency to the TSCADC module in Hz (Default 24000000)
+  -ssmplfreq       Sample clock frequency in Hz (Default 3000000)
+  -oopendly        Open delay in TSCADC clock cycles (Default 152)
+
+filter modules and their options:
+
+ abs               Transform and compresses absolute coordinate "touch" events
+  -b               Touching the screen is a right mouse button (default left)
+  -c               Calibrate mode - don't transform coordinates
+  -f filename      Calibration file name
+  -o x,y           Origin of display region (default, origin of graphics region)
+  -s x,y           Coordinates of lower right corner of display region
+                   (default, width and height of graphics region)

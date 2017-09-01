@@ -1,0 +1,34 @@
+%C - CAN driver for AM335x DCAN Controller
+
+%C [options] ["can#"[,port[,mem[,sysirq[,msgirq][,errirq]]]]] ["am335xcan#"]
+
+where '#' is '1' or '2'
+
+can#   is option used for AM335x DCAN command line configuration:
+port   is DCAN registers base address
+sysirq is DCAN system interrupt
+msgirq is DCAN message interrupt
+errirq is DCAN parity error interrupt
+
+am335xcan# defines defaults for TI AM335x board
+
+Options:
+ -a                       Enable autobus (default OFF)
+ -b string                Predefined bitrate (5K, 10K, 20K, 25K, default 10K)
+ -B brp,tseg1,tseg2,sjw   Manually define bitrate
+ -c number                Define clockrate (default 12000000, i.e. 12Mhz)
+ -c string                Predefined clockrate (12M, 24M, or 48M, default 24M)
+ -D                       Disable mini-driver init if it is present and running (default enabled) 
+ -i midrx[,midtx]         Starting receive and transmit message ID (default 0x100C0000)
+ -l number                CAN message data size (0 - 8 bytes, default 8) 
+ -m number                Initial local timestamp 
+ -M                       Store full receive message info (i.e. message ID, timestamp, etc.) 
+ -n number                Size of each device mailbox message buffer (default 100)
+ -o                       Transmit/Receive data LSB (default MSB) 
+ -r number                Number of receive (RX) mailboxes, TX = 32 - RX (default 16) 
+ -S                       Sort mdriver message based on MID (default all stored in first device) 
+ -t                       Enable self-test loopback mode (default disabled) 
+ -T                       Enable external self-test loopback mode (default disabled) 
+ -u number                CAN unit number (default 1) 
+ -x                       Enable extended 29 bit CAN message ID (default standard 11 bit MID) 
+

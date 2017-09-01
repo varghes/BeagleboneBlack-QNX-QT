@@ -1,0 +1,10 @@
+%C Watchdog Timer Module for the AM335x
+
+Syntax:
+  wdt [options] 
+
+Options:
+ -p    Priority of the Watchdog Timer Module event. (Default: 10)
+ -t    Timeout Period of watchdog timer in milliseconds. (Default: 2x the kicktime)
+ -k    Kick time interval in milliseconds. (Default: 15000 ms)
+ -e    Stop the Watchdog Timer Module and exit immediately.

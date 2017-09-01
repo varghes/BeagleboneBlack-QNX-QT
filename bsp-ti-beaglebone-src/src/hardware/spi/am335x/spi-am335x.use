@@ -1,0 +1,44 @@
+/*
+ * $QNXLicenseC:
+ * Copyright 2009, QNX Software Systems.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You
+ * may not reproduce, modify or distribute this software except in
+ * compliance with the License. You may obtain a copy of the License
+ * at: http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OF ANY KIND, either express or implied.
+ *
+ * This file may contain contributions from others, either as
+ * contributors under the License or as licensors under other terms.
+ * Please review this entire file for other proprietary rights or license
+ * notices, as well as the QNX Development Suite License Guide at
+ * http://licensing.qnx.com/license-guide/ for other information.
+ * $
+ */
+
+%C Driver for OMAP3 SPI controllers
+
+Syntax:
+    spi-master -d omap3 [option[,option ...]] ... &
+
+Options (to override autodetected defaults):
+
+    "base",         /* Base address for this CSPI controller */
+    "bitrate",      /* defines teh bitrate to to assigned to the spi */
+    "clock",        /* defined the value of the clock source of the SPI */
+    "channel",      /* defines the connected channel number (1,2,3, or 4) */
+    "irq",          /* IRQ for this CSPI intereface */
+    "force",        /* Force the default CSx level */
+    "num_cs"        /* number of support devices on this channel (default=1)*/
+    "sdma",         /* Disable/enable SDMA for SPI, 1:enable SDMA, 0:disable SDMA (default)*/ 
+    "cs_delay"     /* Disable/enable 1 1/2 clock CS to data delay, 1:delay, 0:no delay (default) */  
+  edmabase=address    Base address for EDMA controller, default 0x49000000
+  edmairq=num         IRQ of SPI receive EDMA channel, default 0xC111
+  edmachannel=num     EDMA channel for SPI receive
+Examples:
+    # Start McSPI driver with base address, IRQ and waitstates....
+    spi-master -u0 -d dm816x base=0x4809A000,bitrate=125000,clock=48000000,irq=66,force=1,channel=2,sdma=1
+    

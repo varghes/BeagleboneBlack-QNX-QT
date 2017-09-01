@@ -1,0 +1,12 @@
+OMAP35xx I2C manager
+
+%C [options]
+
+Options:
+-a addr     Own address (default: 1)
+-p addr     I2C base address (default: 0x48070000)
+-i irq      I2C interrupt (default: 56)
+-s slave    Slave address (default: 0x49)	/* I2C slave on TWL4030 (Audio Codec)*/
+-c clkspeed I2C bus clock speed in KHz (default: 100)
+-v          verbose
+

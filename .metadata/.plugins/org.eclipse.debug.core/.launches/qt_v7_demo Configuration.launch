@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launchConfiguration type="com.qnx.tools.ide.qde.ui.QDELaunch">
+<listAttribute key="com.qnx.tools.ide.qde.core.ACTIVE_TOOLS"/>
+<listAttribute key="com.qnx.tools.ide.qde.core.ACTIVE_TOOL_DELEGATES"/>
+<booleanAttribute key="com.qnx.tools.ide.qde.core.CLEAN_TARGET" value="true"/>
+<stringAttribute key="com.qnx.tools.ide.qde.core.DIR_UPLOAD" value="/tmp"/>
+<booleanAttribute key="com.qnx.tools.ide.qde.core.DO_NOT_UPLOAD_LIBS" value="true"/>
+<booleanAttribute key="com.qnx.tools.ide.qde.core.DO_UPLOAD" value="true"/>
+<booleanAttribute key="com.qnx.tools.ide.qde.core.LD_BIND_NOW" value="true"/>
+<intAttribute key="com.qnx.tools.ide.qde.core.NUM_UPLOAD_LIBS" value="0"/>
+<booleanAttribute key="com.qnx.tools.ide.qde.core.STRIP_BEFORE_UPLOAD" value="true"/>
+<stringAttribute key="com.qnx.tools.ide.qde.core.TARGET_ATTR" value="192.168.137.80"/>
+<stringAttribute key="com.qnx.tools.ide.qde.core.TARGET_DEBUG_PERSPECTIVE" value="org.eclipse.debug.ui.DebugPerspective"/>
+<stringAttribute key="com.qnx.tools.ide.qde.core.TARGET_DONTUSE_PTY" value="pickaptyforme"/>
+<booleanAttribute key="com.qnx.tools.ide.qde.core.TARGET_FILTER_ATTR" value="true"/>
+<intAttribute key="com.qnx.tools.ide.qde.core.TARGET_PRIO" value="10"/>
+<stringAttribute key="com.qnx.tools.ide.qde.core.TARGET_SCHED" value="r"/>
+<booleanAttribute key="com.qnx.tools.ide.qde.core.USE_UNIQ_NAME" value="true"/>
+<booleanAttribute key="org.eclipse.cdt.debug.mi.core.AUTO_SOLIB" value="true"/>
+<listAttribute key="org.eclipse.cdt.debug.mi.core.AUTO_SOLIB_LIST"/>
+<stringAttribute key="org.eclipse.cdt.debug.mi.core.DEBUG_NAME" value="gdb"/>
+<stringAttribute key="org.eclipse.cdt.debug.mi.core.GDB_INIT" value=".gdbinit"/>
+<listAttribute key="org.eclipse.cdt.debug.mi.core.SOLIB_PATH"/>
+<booleanAttribute key="org.eclipse.cdt.debug.mi.core.STOP_ON_SOLIB_EVENTS" value="false"/>
+<booleanAttribute key="org.eclipse.cdt.debug.mi.core.breakpointsFullPath" value="false"/>
+<stringAttribute key="org.eclipse.cdt.debug.mi.core.commandFactory" value="com.qnx.tools.ide.qde.debug.internal.core.QNXCommandFactory"/>
+<stringAttribute key="org.eclipse.cdt.debug.mi.core.protocol" value="mi"/>
+<booleanAttribute key="org.eclipse.cdt.debug.mi.core.verboseMode" value="false"/>
+<stringAttribute key="org.eclipse.cdt.launch.COREFILE_PATH" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_ID" value="com.qnx.tools.ide.qde.debug.core.CDebugger"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_REGISTER_GROUPS" value=""/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_START_MODE" value="run"/>
+<booleanAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN" value="true"/>
+<stringAttribute key="org.eclipse.cdt.launch.DEBUGGER_STOP_AT_MAIN_SYMBOL" value="main"/>
+<booleanAttribute key="org.eclipse.cdt.launch.ENABLE_REGISTER_BOOKKEEPING" value="false"/>
+<booleanAttribute key="org.eclipse.cdt.launch.ENABLE_VARIABLE_BOOKKEEPING" value="false"/>
+<stringAttribute key="org.eclipse.cdt.launch.FORMAT" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&lt;contentList/&gt;"/>
+<stringAttribute key="org.eclipse.cdt.launch.GLOBAL_VARIABLES" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#13;&#10;&lt;globalVariableList/&gt;&#13;&#10;"/>
+<stringAttribute key="org.eclipse.cdt.launch.MEMORY_BLOCKS" value="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#13;&#10;&lt;memoryBlockExpressionList/&gt;&#13;&#10;"/>
+<stringAttribute key="org.eclipse.cdt.launch.PLATFFORM" value="qnx"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROGRAM_NAME" value="arm/o-le-v7/qt_v7_demo"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_ATTR" value="qt_v7_demo"/>
+<stringAttribute key="org.eclipse.cdt.launch.PROJECT_BUILD_CONFIG_ID_ATTR" value=""/>
+<booleanAttribute key="org.eclipse.cdt.launch.use_terminal" value="true"/>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/qt_v7_demo"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="4"/>
+</listAttribute>
+</launchConfiguration>

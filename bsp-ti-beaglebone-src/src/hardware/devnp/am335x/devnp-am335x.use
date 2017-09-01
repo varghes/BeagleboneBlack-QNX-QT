@@ -1,0 +1,18 @@
+%C Driver for AM335x Ethernet controllers
+
+Syntax:
+  io-pkt-v4 -d driver_dll [option[,option ...]] ...
+
+Options (to override autodetected defaults):
+  duplex=0|1          Half (0) or full (1) duplex mode.
+  iftype=num          Interface type. <net/if_types.h> (default IFT_ETHER)
+  mac=XXXXXXXXXXXX    Interface address of the controller.
+  mru=num             Maximum receive unit (default: 1514)
+  speed=10|100        Media data rate in Megabits/Second
+  verbose=N           Set verbosity level. (default 0)
+  deviceindex=X       Specify the PHY index to enable
+
+Examples:
+  # Start v4 TCP/IP io-pkt using the driver: 
+  io-pkt-v4 -d dm814x deviceindex=0,verbose=1,mac=001122334455
+  ifconfig dm0 10.10.10.1

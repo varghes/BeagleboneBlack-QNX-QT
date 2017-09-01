@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<module name="devg-omapl1xx">
+	<type>Element</type>
+	<classification>Driver</classification>
+
+	<description>
+			<short>Graphics Driver for the TI Internal LCD Raster controller</short>
+	        <abstract>
+				<![CDATA[The devg-omapl1xx shared object is responsible for configuring and operating the TI Internal LCD Raster controller on the Omapl1xx.]]>
+	        </abstract>
+	</description>
+
+	<supports>
+		<availability>
+			<cpu isa="arm">
+				<byteOrder>le</byteOrder>
+			</cpu>
+		</availability>
+	</supports>
+
+	<source available="false">
+		<location type="">.</location>
+	</source>
+	<GroupOwner>hw</GroupOwner>
+
+	<contents>
+		<component id="omapl1xx" generated="true">
+			<location basedir="{os}/{cpu}/dll{.:endian}"
+				 runtime="true">devg-omapl1xx.so</location>
+		</component>
+		<component id="omapl1xx.conf" generated="false">
+		        <location type="install">usr/photon/config</location>
+		        <location runtime="true">omapl1xx.conf</location>
+		</component>
+	</contents>
+
+	<requires>
+		<part rootMacro="LIBFFB_ROOT" build="true" location="lib/ffb"/>
+		<part rootMacro="LIBDISPUTIL_ROOT" build="true" location="lib/disputil"/>
+		<part build="false" location="hardware/devg"/>
+	</requires>
+
+</module>

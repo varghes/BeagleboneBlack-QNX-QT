@@ -1,0 +1,3 @@
+libdma-omapl1xx - DMA Controller driver for the TI OMAPL1XX SOC
+
+Loaded and utilised by various drivers.

@@ -1,0 +1,1003 @@
+/*
+ * $QNXLicenseC:
+ * Copyright 2008, QNX Software Systems.
+ * Copyright 2017 Varghese Alphonse
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You
+ * may not reproduce, modify or distribute this software except in
+ * compliance with the License. You may obtain a copy of the License
+ * at: http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OF ANY KIND, either express or implied.
+ *
+ * This file may contain contributions from others, either as
+ * contributors under the License or as licensors under other terms.
+ * Please review this entire file for other proprietary rights or license
+ * notices, as well as the QNX Development Suite License Guide at
+ * http://licensing.qnx.com/license-guide/ for other information.
+ * $
+ */
+
+
+#ifndef __HDMI_H_INCLUDED
+#define __HDMI_H_INCLUDED
+
+#include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/neutrino.h>
+#include <sys/mman.h>
+#include <hw/inout.h>
+#include <hw/i2c.h>
+#include <sys/hwinfo.h>
+#include <drvr/hwinfo.h>
+#include <sys/slog.h>
+#include <sys/slogcodes.h>
+#include <arm/mx53.h>
+
+#include "display.h"
+
+
+
+enum {FALSE=0,TRUE=1};
+
+/* Page 00h: General Control */
+#define REG_VERSION_LSB           REG(0x00, 0x00)     /* read */
+#define REG_VERSION_MSB           REG(0x00, 0x02)     /* read */
+
+#define REG_MAIN_CNTRL0           REG(0x00, 0x01)     /* read/write */
+# define MAIN_CNTRL0_SR           (1 << 0)  // soft reset (if set) for all modules which do not use cclk clock domain
+# define MAIN_CNTRL0_DECS         (1 << 1)
+# define MAIN_CNTRL0_DEHS         (1 << 2)
+# define MAIN_CNTRL0_CECS         (1 << 3)
+# define MAIN_CNTRL0_CEHS         (1 << 4)
+# define MAIN_CNTRL0_SCALER       (1 << 7)
+
+#define REG_VERSION_MSB           REG(0x00, 0x02)     /* read */
+
+#define REG_SOFTRESET             REG(0x00, 0x0a)     /* write */
+# define SOFTRESET_AUDIO          (1 << 0)
+# define SOFTRESET_I2C_MASTER     (1 << 1)
+
+#define REG_DDC_DISABLE           REG(0x00, 0x0b)     /* read/write */
+
+#define REG_CCLK_ON               REG(0x00, 0x0c)     /* read/write */
+
+#define REG_I2C_MASTER            REG(0x00, 0x0d)     /* read/write */
+# define I2C_MASTER_DIS_MM        (1 << 0)
+# define I2C_MASTER_DIS_FILT      (1 << 1)
+# define I2C_MASTER_APP_STRT_LAT  (1 << 2)
+
+#define REG_FEAT_POWERDOWN        REG(0x00, 0x0e)     /* read/write */
+# define FEAT_POWERDOWN_SPDIF     (1 << 3)
+
+#define REG_INT_FLAGS_0           REG(0x00, 0x0f)     /* read/write */ // bit 1 enables hpd interrupts if set
+
+#define REG_INT_FLAGS_1           REG(0x00, 0x10)     /* read/write */ // bit 7 sets hpd input transition (which transition type creates an interrupt)
+
+#define REG_INT_FLAGS_2           REG(0x00, 0x11)     /* read/write */
+# define INT_FLAGS_2_EDID_BLK_RD  (1 << 1)                              // edid block read flag
+
+#define REG_ENA_ACLK              REG(0x00, 0x16)     /* read/write */
+
+#define REG_ENA_VP_0              REG(0x00, 0x18)     /* read/write */
+
+#define REG_ENA_VP_1              REG(0x00, 0x19)     /* read/write */// enable/disable internal ports
+
+#define REG_ENA_VP_2              REG(0x00, 0x1a)     /* read/write */
+
+#define REG_ENA_AP                REG(0x00, 0x1e)     /* read/write */
+
+#define REG_GEN_INTR              REG(0x00, 0x1f)    // generic interrupt (0x04 to enable)
+
+#define REG_VIP_CNTRL_0           REG(0x00, 0x20)     /* write */
+# define VIP_CNTRL_0_MIRR_A       (1 << 7)
+# define VIP_CNTRL_0_SWAP_A(x)    (((x) & 7) << 4)
+# define VIP_CNTRL_0_MIRR_B       (1 << 3)
+# define VIP_CNTRL_0_SWAP_B(x)    (((x) & 7) << 0)
+
+#define REG_VIP_CNTRL_1           REG(0x00, 0x21)     /* write */
+# define VIP_CNTRL_1_MIRR_C       (1 << 7)
+# define VIP_CNTRL_1_SWAP_C(x)    (((x) & 7) << 4)
+# define VIP_CNTRL_1_MIRR_D       (1 << 3)
+# define VIP_CNTRL_1_SWAP_D(x)    (((x) & 7) << 0)
+
+#define REG_VIP_CNTRL_2           REG(0x00, 0x22)     /* write */
+# define VIP_CNTRL_2_MIRR_E       (1 << 7)
+# define VIP_CNTRL_2_SWAP_E(x)    (((x) & 7) << 4)
+# define VIP_CNTRL_2_MIRR_F       (1 << 3)
+# define VIP_CNTRL_2_SWAP_F(x)    (((x) & 7) << 0)
+
+#define REG_VIP_CNTRL_3           REG(0x00, 0x23)     /* write */   // signal edges
+# define VIP_CNTRL_3_X_TGL        (1 << 0)
+# define VIP_CNTRL_3_H_TGL        (1 << 1)
+# define VIP_CNTRL_3_V_TGL        (1 << 2)
+# define VIP_CNTRL_3_EMB          (1 << 3)
+# define VIP_CNTRL_3_SYNC_DE      (1 << 4)
+# define VIP_CNTRL_3_SYNC_HS      (1 << 5)
+# define VIP_CNTRL_3_DE_INT       (1 << 6)
+# define VIP_CNTRL_3_EDGE         (1 << 7)
+
+#define REG_VIP_CNTRL_4           REG(0x00, 0x24)     /* write */ // color settings
+# define VIP_CNTRL_4_BLC(x)       (((x) & 3) << 0)
+# define VIP_CNTRL_4_BLANKIT(x)   (((x) & 3) << 2)
+# define VIP_CNTRL_4_CCIR656      (1 << 4)
+# define VIP_CNTRL_4_656_ALT      (1 << 5)
+# define VIP_CNTRL_4_TST_656      (1 << 6)
+# define VIP_CNTRL_4_TST_PAT      (1 << 7)
+
+#define REG_VIP_CNTRL_5           REG(0x00, 0x25)     /* write */ // sp_counter and ckcase
+# define VIP_CNTRL_5_CKCASE       (1 << 0)
+# define VIP_CNTRL_5_SP_CNT(x)    (((x) & 3) << 1)
+
+#define REG_MUX_AP                REG(0x00, 0x26)     /* read/write */
+# define MUX_AP_SELECT_I2S        (0x64)
+# define MUX_AP_SELECT_SPDIF      0x40
+
+#define REG_MUX_VP_VIP_OUT        REG(0x00, 0x27)     /* read/write */
+
+#define REG_MAT_CONTRL            REG(0x00, 0x80)     /* write */ // color space conversion regiter
+# define MAT_CONTRL_MAT_SC(x)     (((x) & 3) << 0)
+# define MAT_CONTRL_MAT_BP        (1 << 2)
+
+//         VIDEO FORMAT REGISTERS :
+#define REG_VIDFORMAT             REG(0x00, 0xa0)     /* write - pre-defined video formats */
+#define REG_REFPIX_MSB            REG(0x00, 0xa1)     /* write - refrence pixel */
+#define REG_REFPIX_LSB            REG(0x00, 0xa2)     /* write */
+#define REG_REFLINE_MSB           REG(0x00, 0xa3)     /* write */ // reference line
+#define REG_REFLINE_LSB           REG(0x00, 0xa4)     /* write */
+#define REG_NPIX_MSB              REG(0x00, 0xa5)     /* write */// number of pixels per line
+#define REG_NPIX_LSB              REG(0x00, 0xa6)     /* write */
+#define REG_NLINE_MSB             REG(0x00, 0xa7)     /* write */// number of lines per frame
+#define REG_NLINE_LSB             REG(0x00, 0xa8)     /* write */
+#define REG_VS_LINE_STRT_1_MSB    REG(0x00, 0xa9)     /* write - vertical synchro line nb for start pulse in field 1 */
+#define REG_VS_LINE_STRT_1_LSB    REG(0x00, 0xaa)     /* write */
+#define REG_VS_PIX_STRT_1_MSB     REG(0x00, 0xab)     /* write */// vertical synchro pixel nb for start pulse in field 1
+#define REG_VS_PIX_STRT_1_LSB     REG(0x00, 0xac)     /* write */
+#define REG_VS_LINE_END_1_MSB     REG(0x00, 0xad)     /* write */// vertical synchro line nb for end pulse in field 1
+#define REG_VS_LINE_END_1_LSB     REG(0x00, 0xae)     /* write */
+#define REG_VS_PIX_END_1_MSB      REG(0x00, 0xaf)     /* write */// vertical synchro pixel nb for end pulse in field 1
+#define REG_VS_PIX_END_1_LSB      REG(0x00, 0xb0)     /* write */
+#define REG_VS_LINE_STRT_2_MSB    REG(0x00, 0xb1)     /* write */
+#define REG_VS_LINE_STRT_2_LSB    REG(0x00, 0xb2)     /* write */
+#define REG_VS_PIX_STRT_2_MSB     REG(0x00, 0xb3)     /* write */ // like above, but for field 2
+#define REG_VS_PIX_STRT_2_LSB     REG(0x00, 0xb4)     /* write */
+#define REG_VS_LINE_END_2_MSB     REG(0x00, 0xb5)     /* write */
+#define REG_VS_LINE_END_2_LSB     REG(0x00, 0xb6)     /* write */
+#define REG_VS_PIX_END_2_MSB      REG(0x00, 0xb7)     /* write */
+#define REG_VS_PIX_END_2_LSB      REG(0x00, 0xb8)     /* write */
+#define REG_HS_PIX_START_MSB      REG(0x00, 0xb9)     /* write */
+#define REG_HS_PIX_START_LSB      REG(0x00, 0xba)     /* write */
+#define REG_HS_PIX_STOP_MSB       REG(0x00, 0xbb)     /* write */
+#define REG_HS_PIX_STOP_LSB       REG(0x00, 0xbc)     /* write */
+#define REG_VWIN_START_1_MSB      REG(0x00, 0xbd)     /* write - vertical windows start 1 : vertical win line nb for start pulse in field 1 */
+#define REG_VWIN_START_1_LSB      REG(0x00, 0xbe)     /* write */
+#define REG_VWIN_END_1_MSB        REG(0x00, 0xbf)     /* write */
+#define REG_VWIN_END_1_LSB        REG(0x00, 0xc0)     /* write */
+#define REG_VWIN_START_2_MSB      REG(0x00, 0xc1)     /* write */
+#define REG_VWIN_START_2_LSB      REG(0x00, 0xc2)     /* write */
+#define REG_VWIN_END_2_MSB        REG(0x00, 0xc3)     /* write */
+#define REG_VWIN_END_2_LSB        REG(0x00, 0xc4)     /* write */
+#define REG_DE_START_MSB          REG(0x00, 0xc5)     /* write - data enable pix nb for start pulse in field 1 */
+#define REG_DE_START_LSB          REG(0x00, 0xc6)     /* write */
+#define REG_DE_STOP_MSB           REG(0x00, 0xc7)     /* write */
+#define REG_DE_STOP_LSB           REG(0x00, 0xc8)     /* write */
+
+#define REG_TBG_CNTRL_0           REG(0x00, 0xca)     /* write */
+# define TBG_CNTRL_0_TOP_TGL      (1 << 0)
+# define TBG_CNTRL_0_TOP_SEL      (1 << 1)
+# define TBG_CNTRL_0_DE_EXT       (1 << 2)   // 0 by default (internal), to be set if extern Data Enable
+# define TBG_CNTRL_0_TOP_EXT      (1 << 3)   // 0 by default, to be set if external
+# define TBG_CNTRL_0_FRAME_DIS    (1 << 5)   // frame disable (enable if 0)
+# define TBG_CNTRL_0_SYNC_MTHD    (1 << 6)   // 0-> synchro by v and h  / 1-> v and x (data enable)
+# define TBG_CNTRL_0_SYNC_ONCE    (1 << 7)   // 0-> line/pix counters synchronised each frame   - 1-> synchronised once
+
+#define REG_TBG_CNTRL_1           REG(0x00, 0xcb)     /* write */
+# define TBG_CNTRL_1_H_TGL        (1 << 0)
+# define TBG_CNTRL_1_V_TGL        (1 << 1)
+# define TBG_CNTRL_1_TGL_EN       (1 << 2)
+# define TBG_CNTRL_1_VHX_EXT_DE   (1 << 3)   // DataEnable ext if 1 - int if 0
+# define TBG_CNTRL_1_VHX_EXT_HS   (1 << 4)   // Hsync ext if 1 - int if 0
+# define TBG_CNTRL_1_VHX_EXT_VS   (1 << 5)   // Vsync ext if 1 - int if 0
+# define TBG_CNTRL_1_DWIN_DIS     (1 << 6)   // data island windows disable
+
+#define REG_ENABLE_SPACE          REG(0x00, 0xd6)     /* write - enable video out */
+
+/* HDMI video formatter ctrl registers */
+#define REG_HVF_CNTRL_0           REG(0x00, 0xe4)   /* write HDMI video formatter ctrl registers */
+# define HVF_CNTRL_0_RWB          (1 << 6)           // 0-> 4 bar pattern  - 1-> 8 bar pattern
+# define HVF_CNTRL_0_SM           (1 << 7)           // color bar inserted in video path if = 1 ; normal video else
+# define HVF_CNTRL_0_INTPOL(x)    (((x) & 3) << 0)   // interpolation
+# define HVF_CNTRL_0_PREFIL(x)    (((x) & 3) << 2)   // prefilter
+
+#define REG_HVF_CNTRL_1           REG(0x00, 0xe5)   /* write - video signal types */
+# define HVF_CNTRL_1_FOR          (1 << 0)
+# define HVF_CNTRL_1_YUVBLK       (1 << 1)           // yuv blank level 0->16 - 1->0
+# define HVF_CNTRL_1_VQR(x)       (((x) & 3) << 2)
+# define HVF_CNTRL_1_PAD(x)       (((x) & 3) << 4)   // # bit for datapath (12b default)
+# define HVF_CNTRL_1_SEMI_PLANAR  (1 << 6)
+
+#define REG_RPT_CNTRL             REG(0x00, 0xf0)   /* write - bits 3 to 0 -> pixel repeat */
+
+#define REG_I2S_FORMAT            REG(0x00, 0xfc)
+# define I2S_FORMAT(x)            (((x) & 3) << 0)
+
+#define REG_AIP_CLKSEL            REG(0x00, 0xfd)
+# define AIP_CLKSEL_FS(x)         (((x) & 3) << 0)
+# define AIP_CLKSEL_CLK_POL(x)    (((x) & 1) << 2)
+# define AIP_CLKSEL_AIP(x)        (((x) & 7) << 3)
+
+/* Page 02h: PLL settings */
+#define REG_PLL_SERIAL_1          REG(0x02, 0x00)     /* read/write */
+# define PLL_SERIAL_1_SRL_FDN     (1 << 0)
+# define PLL_SERIAL_1_SRL_IZ(x)   (((x) & 3) << 1)
+# define PLL_SERIAL_1_SRL_MAN_IZ  (1 << 6)
+
+#define REG_PLL_SERIAL_2          REG(0x02, 0x01)     /* read/write */
+# define PLL_SERIAL_2_SRL_NOSC(x) ((x) << 0)
+# define PLL_SERIAL_2_SRL_PR(x)   (((x) & 0xf) << 4)
+
+#define REG_PLL_SERIAL_3          REG(0x02, 0x02)     /* read/write */
+# define PLL_SERIAL_3_SRL_CCIR    (1 << 0)
+# define PLL_SERIAL_3_SRL_DE      (1 << 2)
+# define PLL_SERIAL_3_SRL_PXIN_SEL (1 << 4)
+
+#define REG_SERIALIZER            REG(0x02, 0x03)     /* read/write */
+#define REG_BUFFER_OUT            REG(0x02, 0x04)     /* read/write */
+#define REG_PLL_SCG1              REG(0x02, 0x05)     /* read/write */
+#define REG_PLL_SCG2              REG(0x02, 0x06)     /* read/write */
+#define REG_PLL_SCGN1             REG(0x02, 0x07)     /* read/write */
+#define REG_PLL_SCGN2             REG(0x02, 0x08)     /* read/write */
+#define REG_PLL_SCGR1             REG(0x02, 0x09)     /* read/write */
+#define REG_PLL_SCGR2             REG(0x02, 0x0a)     /* read/write */
+
+#define REG_AUDIO_DIV             REG(0x02, 0x0e)     /* read/write */
+# define AUDIO_DIV_SERCLK_1       0
+# define AUDIO_DIV_SERCLK_2       1
+# define AUDIO_DIV_SERCLK_4       2
+# define AUDIO_DIV_SERCLK_8       3
+# define AUDIO_DIV_SERCLK_16      4
+# define AUDIO_DIV_SERCLK_32      5
+
+#define REG_SEL_CLK               REG(0x02, 0x11)     /* read/write */
+# define SEL_CLK_SEL_CLK1         (1 << 0)
+# define SEL_CLK_SEL_VRF_CLK(x)   (((x) & 3) << 1)
+# define SEL_CLK_ENA_SC_CLK       (1 << 3)
+
+#define REG_ANA_GENERAL           REG(0x02, 0x12)     /* read/write */
+
+
+/* Page 09h: EDID Control */
+#define REG_EDID_DATA_0           REG(0x09, 0x00)     /* read */
+/* next 127 successive registers are the EDID block */
+							//    REG(0x09, 0x7f)     /* read */
+#define REG_EDID_CTRL             REG(0x09, 0xfa)     /* read/write */
+#define REG_DDC_ADDR              REG(0x09, 0xfb)     /* read/write */
+#define REG_DDC_OFFS              REG(0x09, 0xfc)     /* read/write */
+#define REG_DDC_SEGM_ADDR         REG(0x09, 0xfd)     /* read/write */
+#define REG_DDC_SEGM              REG(0x09, 0xfe)     /* read/write */
+
+
+/* Page 10h: information frames and packets */
+#define REG_IF1_HB0               REG(0x10, 0x20)     /* read/write */
+#define REG_IF2_HB0               REG(0x10, 0x40)     /* read/write */
+#define REG_IF3_HB0               REG(0x10, 0x60)     /* read/write */
+#define REG_IF4_HB0               REG(0x10, 0x80)     /* read/write */
+#define REG_IF5_HB0               REG(0x10, 0xa0)     /* read/write */
+
+/* Page 11h: audio settings and content info packets */
+#define REG_AIP_CNTRL_0           REG(0x11, 0x00)     /* read/write */
+# define AIP_CNTRL_0_RST_FIFO     (1 << 0)
+# define AIP_CNTRL_0_SWAP         (1 << 1)
+# define AIP_CNTRL_0_LAYOUT       (1 << 2)
+# define AIP_CNTRL_0_ACR_MAN      (1 << 5)
+# define AIP_CNTRL_0_RST_CTS      (1 << 6)
+
+#define REG_CA_I2S                REG(0x11, 0x01)     /* read/write */
+# define CA_I2S_CA_I2S(x)         (((x) & 31) << 0)
+# define CA_I2S_HBR_CHSTAT        (1 << 6)
+
+#define REG_LATENCY_RD            REG(0x11, 0x04)     /* read/write */
+#define REG_ACR_CTS_0             REG(0x11, 0x05)     /* read/write */
+#define REG_ACR_CTS_1             REG(0x11, 0x06)     /* read/write */
+#define REG_ACR_CTS_2             REG(0x11, 0x07)     /* read/write */
+#define REG_ACR_N_0               REG(0x11, 0x08)     /* read/write */
+#define REG_ACR_N_1               REG(0x11, 0x09)     /* read/write */
+#define REG_ACR_N_2               REG(0x11, 0x0a)     /* read/write */
+
+#define REG_GC_AVMUTE             REG(0x11, 0x0b)
+# define GC_AVMUTE_CLRMUTE        (1 << 0)
+# define GC_AVMUTE_SETMUTE        (1 << 1)
+
+ #define REG_CTS_N                 REG(0x11, 0x0c)     /* read/write */
+# define CTS_N_K(x)               (((x) & 7) << 0)
+# define CTS_N_M(x)               (((x) & 3) << 4)
+
+#define REG_ENC_CNTRL             REG(0x11, 0x0d)     /* read/write */
+# define ENC_CNTRL_RST_ENC        (1 << 0)
+# define ENC_CNTRL_RST_SEL        (1 << 1)
+# define ENC_CNTRL_CTL_CODE(x)    (((x) & 3) << 2)
+
+#define REG_DIP_FLAGS             REG(0x11, 0x0e)
+# define DIP_FLAGS_ACR            (1 << 0)
+# define DIP_FLAGS_GC             (1 << 1)
+
+#define REG_DIP_IF_FLAGS          REG(0x11, 0x0f)     /* read/write */
+#define DIP_IF_FLAGS_IF1          (1 << 1)
+#define DIP_IF_FLAGS_IF2          (1 << 2)
+#define DIP_IF_FLAGS_IF3          (1 << 3)
+#define DIP_IF_FLAGS_IF4          (1 << 4)
+#define DIP_IF_FLAGS_IF5          (1 << 5)
+
+#define REG_CH_STAT_B(x)          REG(0x11, 0x14 + (x)) /* read/write */
+
+/* Page 12h: HDCP and OTP */
+#define REG_TX3                   REG(0x12, 0x9a)     /* read/write */
+#define REG_TX4                   REG(0x12, 0x9b)     /* read/write */
+# define TX4_PD_RAM               (1 << 1)
+#define REG_TX33                  REG(0x12, 0xb8)     /* read/write */
+# define TX33_HDMI                (1 << 1)
+
+
+/* Page 13h: Gamut related metadata packets */
+
+
+/* CEC registers: (not paged)*/
+#define REG_CEC_INTSTATUS         0xee                /* read */
+# define CEC_INTSTATUS_CEC        (1 << 0)
+# define CEC_INTSTATUS_HDMI       (1 << 1)
+
+#define REG_CEC_FRO_IM_CLK_CTRL   0xfb                /* read/write */
+# define CEC_FRO_IM_CLK_CTRL_FRO_DIV   (1 << 0)
+# define CEC_FRO_IM_CLK_CTRL_IMCLK_SEL (1 << 1)
+# define CEC_FRO_IM_CLK_CTRL_ENA_OTP   (1 << 6)
+# define CEC_FRO_IM_CLK_CTRL_GHOST_DIS (1 << 7)
+
+#define REG_CEC_RXSHPDINTENA      0xfc                /* read/write */
+
+#define REG_CEC_RXSHPDINT         0xfd                /* read */
+
+#define REG_CEC_RXSHPDLEV         0xfe                /* read */
+# define CEC_RXSHPDLEV_RXSENS     (1 << 0)
+# define CEC_RXSHPDLEV_HPD        (1 << 1)
+
+#define REG_CEC_ENAMODS           0xff                /* read/write */
+# define CEC_ENAMODS_EN_CEC       (1 << 0)
+# define CEC_ENAMODS_EN_HDMI      (1 << 1)
+# define CEC_ENAMODS_EN_RXSENS    (1 << 2)
+# define CEC_ENAMODS_DIS_CCLK     (1 << 5)
+# define CEC_ENAMODS_DIS_FRO      (1 << 6)
+
+
+
+/* Device versions: */
+#define TDA9989N2                 0x0101
+#define TDA19989                  0x0201
+#define TDA19989N2                0x0202
+#define TDA19988                  0x0301
+
+
+// timing signal polarity etc. ..used in RASTER_TIMING_2
+#define LCDC_INV_VSYNC			0x0001  //bit 20
+#define LCDC_INV_HSYNC			0x0002  //bit 21
+#define LCDC_INV_PIX_CLOCK		0x0004  //bit 22
+#define LCDC_INV_OUTPUT_EN		0x0008  //bit 23
+#define LCDC_HSVS_FALLING_EDGE	0x0010  //bit 24
+#define LCDC_HSVS_CONTROL		0x0020  //bit 25
+#define LCDC_SIGNAL_MASK		0x003f
+
+#define LCDC_PANEL_TFT			0x0100	//bit
+
+/* Video mode flags */
+/* bit compatible with the xorg definitions. */
+#define DRM_MODE_FLAG_PHSYNC	(1<<0)
+#define DRM_MODE_FLAG_NHSYNC	(1<<1)
+#define DRM_MODE_FLAG_PVSYNC	(1<<2)
+#define DRM_MODE_FLAG_NVSYNC	(1<<3)
+#define DRM_MODE_FLAG_INTERLACE	(1<<4)
+#define DRM_MODE_FLAG_DBLSCAN	(1<<5)
+#define DRM_MODE_FLAG_CSYNC	(1<<6)
+#define DRM_MODE_FLAG_PCSYNC	(1<<7)
+#define DRM_MODE_FLAG_NCSYNC	(1<<8)
+#define DRM_MODE_FLAG_HSKEW	(1<<9) /* hskew provided */
+#define DRM_MODE_FLAG_BCAST	(1<<10)
+#define DRM_MODE_FLAG_PIXMUX	(1<<11)
+#define DRM_MODE_FLAG_DBLCLK	(1<<12)
+#define DRM_MODE_FLAG_CLKDIV2	(1<<13)
+
+enum panel_shade {
+	MONOCHROME = 0,
+	COLOR_ACTIVE,
+	COLOR_PASSIVE,
+};
+
+#define		MAX_PALETTE_SIZE		0x00001000
+
+//DISPC_PIXELFORMAT (pixel formats for LCDC)
+
+#define DISPC_PIXELFORMAT_BITMAP1               (0x0)
+#define DISPC_PIXELFORMAT_BITMAP2               (0x1)
+#define DISPC_PIXELFORMAT_BITMAP4               (0x2)
+#define DISPC_PIXELFORMAT_BITMAP8               (0x3)
+#define DISPC_PIXELFORMAT_RGB12                 (0x4)
+#define DISPC_PIXELFORMAT_ARGB16                (0x5)
+#define DISPC_PIXELFORMAT_RGB16                 (0x6)
+#define DISPC_PIXELFORMAT_RGB32                 (0x8)
+#define DISPC_PIXELFORMAT_RGB24                 (0x9)
+#define DISPC_PIXELFORMAT_YUV2                  (0xA)
+#define DISPC_PIXELFORMAT_UYVY                  (0xB)
+#define DISPC_PIXELFORMAT_ARGB32                (0xC)
+#define DISPC_PIXELFORMAT_RGBA32                (0xD)
+#define DISPC_PIXELFORMAT_RGBx32                (0xE)
+
+enum fb_update_mode {
+	FB_UPDATE_DISABLED = 0,
+	FB_AUTO_UPDATE,
+};
+
+
+
+#define		MAX_PALETTE_SIZE		0x00001000
+
+//DISPC_PIXELFORMAT (pixel formats for LCDC)
+
+#define DISPC_PIXELFORMAT_BITMAP1               (0x0)
+#define DISPC_PIXELFORMAT_BITMAP2               (0x1)
+#define DISPC_PIXELFORMAT_BITMAP4               (0x2)
+#define DISPC_PIXELFORMAT_BITMAP8               (0x3)
+#define DISPC_PIXELFORMAT_RGB12                 (0x4)
+#define DISPC_PIXELFORMAT_ARGB16                (0x5)
+#define DISPC_PIXELFORMAT_RGB16                 (0x6)
+#define DISPC_PIXELFORMAT_RGB32                 (0x8)
+#define DISPC_PIXELFORMAT_RGB24                 (0x9)
+#define DISPC_PIXELFORMAT_YUV2                  (0xA)
+#define DISPC_PIXELFORMAT_UYVY                  (0xB)
+#define DISPC_PIXELFORMAT_ARGB32                (0xC)
+#define DISPC_PIXELFORMAT_RGBA32                (0xD)
+#define DISPC_PIXELFORMAT_RGBx32                (0xE)
+
+
+
+
+// timing signal polarity etc. ..used in RASTER_TIMING_2
+#define LCDC_INV_VSYNC			0x0001  //bit 20
+#define LCDC_INV_HSYNC			0x0002  //bit 21
+#define LCDC_INV_PIX_CLOCK		0x0004  //bit 22
+#define LCDC_INV_OUTPUT_EN		0x0008  //bit 23
+#define LCDC_HSVS_FALLING_EDGE	0x0010  //bit 24
+#define LCDC_HSVS_CONTROL		0x0020  //bit 25
+#define LCDC_SIGNAL_MASK		0x003f
+
+#define LCDC_PANEL_TFT			0x0100	//bit
+
+/*typedef struct OMAP_LCD_DVI_RES_MENU {
+    DWORD       lcdDviRes;
+    LPCWSTR     resName;
+} OMAP_LCD_DVI_RES_MENU;*/
+/*typedef enum OMAP_LCD_DVI_RES {
+	OMAP_RES_DEFAULT=0,
+    OMAP_LCD_320W_240H,
+    OMAP_LCD_480W_272H,
+    OMAP_LCD_640W_480H,
+    OMAP_LCD_800W_480H,
+    OMAP_LCD_800W_480H4D,
+    OMAP_LCD_800W_600H,
+    OMAP_DVI_800W_600H,		// first DVI supported mode see IsDVIMode()
+    OMAP_DVI_1024W_768H,
+    OMAP_DVI_1280W_720H,
+    OMAP_RES_INVALID
+}OMAP_LCD_DVI_RES;*/
+
+struct display_panel {
+	int			config;			/* TFT/STN, signal inversion */
+	int			pixel_format;	/* Pixel format in fb mem */
+	int			x_res, y_res;
+	int			pixel_clock;	/* In kHz */
+	int			hsw;			/* Horizontal synchronization pulse width */
+	int			hfp;			/* Horizontal front porch */
+	int			hbp;			/* Horizontal back porch */
+	int			vsw;			/* Vertical synchronization	pulse width */
+	int			vfp;			/* Vertical front porch */
+	int			vbp;			/* Vertical back porch */
+	int			acb;			/* ac-bias pin frequency */
+	//int			mono_8bit_mode;
+//	int         tft_alt_mode;
+//	enum panel_shade	panel_shade;
+  //  enum OMAP_LCD_DVI_RES	dispRes; //removed varghese
+	//int		IsDVI; //bool
+//	int			(*init)		(void);
+//	int			(*enable)	(BOOL);
+};
+
+
+
+
+
+#ifdef varghese
+struct drm_display_mode {
+	int clock;		/* in kHz */
+	int hdisplay;
+	int hsync_start;
+	int hsync_end;
+	int htotal;
+	int hskew;
+	int vdisplay;
+	int vsync_start;
+	int vsync_end;
+	int vtotal;
+	int vscan;
+	unsigned int flags;
+	/* other parameters not required*/
+};
+#endif
+
+struct drm_display_mode *mode;
+
+#define UINT32 uint32_t
+typedef struct{
+	UINT32  PID;
+	UINT32 CTRL;
+	UINT32 NOTUSED1;
+	UINT32 LIDD_CTRL;
+	UINT32 LIDD_CS0_CONF;
+	UINT32 LIDD_CS0_ADDR;
+    UINT32 LIDD_CS0_DATA;
+    UINT32 LIDD_CS1_CONF;
+    UINT32 LIDD_CS1_ADDR;
+    UINT32 LIDD_CS1_DATA;
+    UINT32 RASTER_CTRL;
+    UINT32 RASTER_TIMING_0;
+    UINT32 RASTER_TIMING_1;
+    UINT32 RASTER_TIMING_2;
+    UINT32 RASTER_SUBPANEL;
+    UINT32 RASTER_SUBPANEL2;
+    UINT32 LCDDMA_CTRL;
+    UINT32 LCDDMA_FB0_BASE;
+    UINT32 LCDDMA_FB0_CEILING;
+    UINT32 LCDDMA_FB1_BASE;
+    UINT32 LCDDMA_FB1_CEILING;
+    UINT32 SYSCONFIG;
+    UINT32 IRQSTATUS_RAW;
+    UINT32 IRQSTATUS;
+    UINT32 IRQENABLE_SET;
+    UINT32 IRQENABLE_CLEAR;
+	UINT32 NOTUSED2;
+    UINT32 CLKC_ENABLE;
+    UINT32 CLKC_RESET;
+}AM33X_LCDC_REGS ;
+
+#define LCDC_REGS AM33X_LCDC_REGS
+
+
+// Register definitions
+// CTRL register
+#define LCDC_CTRL_MODESEL_RASTER			(1 << 0)
+#define LCDC_CTRL_AUTO_UF_RESTART			(1 << 1)
+#define LCDC_CTRL_CLKDIV(x)					((x) << 8)
+#define LCDC_CTRL_CLKDIV_MASK				(0xff << 8)
+
+
+// RASTER_CTRL register
+#define LCDC_RASTER_CTRL_LCD_EN				(1 << 0)
+#define LCDC_RASTER_CTRL_MONOCHROME_MODE	(1 << 1)
+#define LCDC_RASTER_CTRL_LCD_TFT			(1 << 7)
+#define LCDC_RASTER_CTRL_RASTER_ORDER		(1 << 8)
+#define LCDC_RASTER_CTRL_MONO_8BIT_MODE		(1 << 9)
+#define LCDC_RASTER_CTRL_LINE_IRQ_CLR_SEL	(1 << 10)
+#define LCDC_RASTER_CTRL_PALMODE(x)			((x) << 20)
+#define LCDC_RASTER_CTRL_TFT_ALT_ENABLE		(1 << 23)
+#define LCDC_RASTER_CTRL_LCD_STN_565		(1 << 24)
+#define LCDC_RASTER_CTRL_LCD_TFT_24			(1 << 25)
+#define LCDC_RASTER_CTRL_TFT_24BPP_UNPACK	(1 << 26)
+#define LCDC_RASTER_CTRL_REQDLY(x)			((x) << 12)
+#define LCDC_RASTER_CTRL_REQDLY_MASK		(0xff << 12)
+
+// RASTER_TIMING_2 register
+#define LCDC_RASTER_RASTER_TIMING_2
+
+
+// LCD DMA Control Register
+#define LCDC_DMA_CTRL_DUAL_FRAME_BUFFER_EN	(1 << 0)
+#define LCDC_DMA_CTRL_BURST_SIZE(x)			((x) << 4)
+#define LCDC_DMA_CTRL_BURST_1				0x0
+#define LCDC_DMA_CTRL_BURST_2				0x1
+#define LCDC_DMA_CTRL_BURST_4				0x2
+#define LCDC_DMA_CTRL_BURST_8				0x3
+#define LCDC_DMA_CTRL_BURST_16				0x4
+#define LCDC_DMA_CTRL_BURST_SIZE_MASK		(0x7 << 4)
+#define LCDC_DMA_CTRL_TH_FIFO_READY(x)		((x) << 8)
+#define LCDC_DMA_CTRL_TH_FIFO_READY_8		0x0
+#define LCDC_DMA_CTRL_TH_FIFO_READY_16		0x1
+#define LCDC_DMA_CTRL_TH_FIFO_READY_32		0x2
+#define LCDC_DMA_CTRL_TH_FIFO_READY_64		0x3
+#define LCDC_DMA_CTRL_TH_FIFO_READY_128		0x4
+#define LCDC_DMA_CTRL_TH_FIFO_READY_256		0x5
+#define LCDC_DMA_CTRL_TH_FIFO_READY_512		0x6
+#define LCDC_DMA_CTRL_TH_FIFO_READY_MASK	(0x7 << 8)
+
+// IRQ Status register
+#define LCDC_IRQSTATUS_DONE					(1 << 0)
+#define LCDC_IRQSTATUS_RASTER_DONE			(1 << 1)
+#define LCDC_IRQSTATUS_SYNC_LOST			(1 << 2)
+#define LCDC_IRQSTATUS_AC_BIAS				(1 << 3)
+#define LCDC_IRQSTATUS_FUF					(1 << 5)
+#define LCDC_IRQSTATUS_PALETTE_LOADED		(1 << 6)
+#define LCDC_IRQSTATUS_FRAME_DONE0			(1 << 8)
+#define LCDC_IRQSTATUS_FRAME_DONE1			(1 << 9)
+
+// LCD IRQ Enable Set/Clear Register
+#define LCDC_IRQENABLE_DONE_INT				(1 << 0)
+#define LCDC_IRQENABLE_RASTER_DONE_INT		(1 << 1)
+#define LCDC_IRQENABLE_UNDERFLOW_INT		(1 << 5)
+#define LCDC_IRQENABLE_PALETTE_INT			(1 << 6)
+#define LCDC_IRQENABLE_END_OF_FRAME0_INT	(1 << 8)
+#define LCDC_IRQENABLE_END_OF_FRAME1_INT	(1 << 9)
+
+// CLKC_ENABLE register
+#define LCDC_CLKC_ENABLE_CORE				(1 << 0)
+#define LCDC_CLKC_ENABLE_LIDD				(1 << 1)
+#define LCDC_CLKC_ENABLE_DMA				(1 << 2)
+
+
+#define LCDC_AC_BIAS_TRANSITIONS_PER_INT(x)	((x) << 16)
+#define LCDC_AC_BIAS_FREQUENCY(x)			((x) << 8)
+
+
+// SYSCONFIG register
+#define LCDC_SYSCONFIG_SOFTRESET			(1 << 0)
+#define LCDC_SYSCONFIG_FREEEMU				(1 << 1)
+#define LCDC_SYSCONFIG_FORCEIDLE			(0 << 2)
+#define LCDC_SYSCONFIG_NOIDLE				(1 << 2)
+#define LCDC_SYSCONFIG_SMARTIDLE			(2 << 2)
+#define LCDC_SYSCONFIG_IDLE_MASK			(3 << 2)
+#define LCDC_SYSCONFIG_FORCESTANDBY			(0 << 4)
+#define LCDC_SYSCONFIG_NOSTANDBY			(1 << 4)
+#define LCDC_SYSCONFIG_SMARTSTANDBY			(2 << 4)
+#define LCDC_SYSCONFIG_STANDBY_MASK			(3 << 4)
+enum lcdc_load_mode {
+	LCDC_LOAD_PALETTE_AND_FRAME = 0,
+	LCDC_LOAD_PALETTE,
+	LCDC_LOAD_FRAME,
+};
+
+#define AM33X_PRCM_REGS_PA                       0x44E00000
+
+typedef struct {
+	UINT32	tCM_PER_L4LS_CLKSTCTRL;		// 0x0000
+	UINT32	CM_PER_L3S_CLKSTCTRL;		// 0x0004
+	UINT32	CM_PER_L4FW_CLKSTCTRL;		// 0x0008
+	UINT32	CM_PER_L3_CLKSTCTRL;		// 0x000C
+	UINT32	CM_PER_PCIE_CLKCTRL;		// 0x0010
+	UINT32	CM_PER_CPGMAC0_CLKCTRL;		// 0x0014
+	UINT32	CM_PER_LCDC_CLKCTRL;		// 0x0018
+	UINT32	CM_PER_USB0_CLKCTRL;		// 0x001C
+	UINT32	CM_PER_MLB_CLKCTRL;			// 0x0020
+	UINT32	CM_PER_TPTC0_CLKCTRL;		// 0x0024
+	UINT32	CM_PER_EMIF_CLKCTRL;		// 0x0028
+	UINT32	CM_PER_OCMCRAM_CLKCTRL;		// 0x002C
+	UINT32	CM_PER_GPMC_CLKCTRL;		// 0x0030
+	UINT32	CM_PER_MCASP0_CLKCTRL;		// 0x0034  varghese
+	UINT32	CM_PER_UART5_CLKCTRL;		// 0x0038
+	UINT32	CM_PER_MMC0_CLKCTRL;		// 0x003C
+	UINT32	CM_PER_ELM_CLKCTRL;			// 0x0040
+	UINT32	CM_PER_I2C2_CLKCTRL;		// 0x0044
+	UINT32	CM_PER_I2C1_CLKCTRL;		// 0x0048
+	UINT32	CM_PER_SPI0_CLKCTRL;		// 0x004C
+	UINT32	CM_PER_SPI1_CLKCTRL;		// 0x0050
+	UINT32	CM_PER_SPI2_CLKCTRL;		// 0x0054
+	UINT32	CM_PER_SPI3_CLKCTRL;		// 0x0058
+	UINT32	res_005C;
+	UINT32	CM_PER_L4LS_CLKCTRL;		// 0x0060
+	UINT32	CM_PER_L4FW_CLKCTRL;		// 0x0064
+	UINT32	CM_PER_MCASP1_CLKCTRL;		// 0x0068
+	UINT32	CM_PER_UART1_CLKCTRL;		// 0x006C
+	UINT32	CM_PER_UART2_CLKCTRL;		// 0x0070
+	UINT32	CM_PER_UART3_CLKCTRL;		// 0x0074
+	UINT32	CM_PER_UART4_CLKCTRL;		// 0x0078
+	UINT32	CM_PER_TIMER7_CLKCTRL;		// 0x007C
+	UINT32	CM_PER_TIMER2_CLKCTRL;		// 0x0080
+	UINT32	CM_PER_TIMER3_CLKCTRL;		// 0x0084
+	UINT32	CM_PER_TIMER4_CLKCTRL;		// 0x0088
+	UINT32	CM_PER_MCASP2_CLKCTRL;		// 0x008C
+	UINT32	CM_PER_RNG_CLKCTRL;			// 0x0090
+	UINT32	CM_PER_AES0_CLKCTRL;		// 0x0094
+	UINT32	CM_PER_AES1_CLKCTRL;		// 0x0098
+	UINT32	CM_PER_DES_CLKCTRL;			// 0x009C
+	UINT32	CM_PER_SHA0_CLKCTRL;		// 0x00A0
+	UINT32	CM_PER_PKA_CLKCTRL;			// 0x00A4
+	UINT32	CM_PER_GPIO6_CLKCTRL;		// 0x00A8
+	UINT32	CM_PER_GPIO1_CLKCTRL;		// 0x00AC
+	UINT32	CM_PER_GPIO2_CLKCTRL;		// 0x00B0
+	UINT32	CM_PER_GPIO3_CLKCTRL;		// 0x00B4
+	UINT32	CM_PER_GPIO4_CLKCTRL;		// 0x00B8
+	UINT32	CM_PER_TPCC_CLKCTRL;		// 0x00BC
+	UINT32	CM_PER_DCAN0_CLKCTRL;		// 0x00C0
+	UINT32	CM_PER_DCAN1_CLKCTRL;		// 0x00C4
+	UINT32	CM_PER_SPARE_CLKCTRL;		// 0x00C8
+	UINT32	CM_PER_EPWMSS1_CLKCTRL;		// 0x00CC
+	UINT32	CM_PER_EMIF_FW_CLKCTRL;		// 0x00D0
+	UINT32	CM_PER_EPWMSS0_CLKCTRL;		// 0x00D4
+	UINT32	CM_PER_EPWMSS2_CLKCTRL;		// 0x00D8
+	UINT32	CM_PER_L3_INSTR_CLKCTRL;	// 0x00DC
+	UINT32	CM_PER_L3_CLKCTRL;			// 0x00E0
+	UINT32	CM_PER_IEEE5000_CLKCTRL;	// 0x00E4
+	UINT32	CM_PER_ICSS_CLKCTRL;		// 0x00E8
+	UINT32	CM_PER_TIMER5_CLKCTRL;		// 0x00EC
+	UINT32	CM_PER_TIMER6_CLKCTRL;		// 0x00F0
+	UINT32	CM_PER_MMC1_CLKCTRL;		// 0x00F4
+	UINT32	CM_PER_MMC2_CLKCTRL;		// 0x00F8
+	UINT32	CM_PER_TPTC1_CLKCTRL;		// 0x00FC
+	UINT32	CM_PER_TPTC2_CLKCTRL;		// 0x0100
+	UINT32	CM_PER_GPIO5_CLKCTRL;		// 0x0104
+	UINT32	res_0108;
+	UINT32	CM_PER_SPINLOCK_CLKCTRL;	// 0x010C
+	UINT32	CM_PER_MAILBOX0_CLKCTRL;	// 0x0110
+	UINT32  res_0114_0118[2];
+	UINT32	CM_PER_L4HS_CLKSTCTRL;		// 0x011C
+	UINT32	CM_PER_L4HS_CLKCTRL;		// 0x0120
+	UINT32	CM_PER_MSTR_EXPS_CLKCTRL;	// 0x0124
+	UINT32	CM_PER_SLV_EXPS_CLKCTRL;	// 0x0128
+	UINT32	CM_PER_OCPWP_L3_CLKSTCTRL;	// 0x012C
+	UINT32	CM_PER_OCPWP_CLKCTRL;		// 0x0130
+	UINT32	CM_PER_MAILBOX1_CLKCTRL;	// 0x0134
+	UINT32	CM_PER_SPARE0_CLKCTRL;		// 0x0138
+	UINT32	CM_PER_SPARE1_CLKCTRL;		// 0x013C
+	UINT32	CM_PER_ICSS_CLKSTCTRL;		// 0x0140
+	UINT32	CM_PER_CPSW_CLKSTCTRL;		// 0x0144
+	UINT32	CM_PER_LCDC_CLKSTCTRL;		// 0x0148
+	UINT32	CM_PER_CLKDIV32K_CLKCTRL;	// 0x014C
+	UINT32	CM_PER_CLK_24MHZ_CLKSTCTRL;	// 0x0150
+	UINT32	res_0154_03fc[171];
+
+	UINT32	CM_WKUP_CLKSTCTRL;			// 0x0400
+	UINT32	CM_WKUP_CONTROL_CLKCTRL;	// 0x0404
+	UINT32	CM_WKUP_GPIO0_CLKCTRL;		// 0x0408
+	UINT32	CM_WKUP_L4WKUP_CLKCTRL;		// 0x040C
+	UINT32	CM_WKUP_TIMER0_CLKCTRL;		// 0x0410
+	UINT32	CM_WKUP_DEBUGSS_CLKCTRL;	// 0x0414
+	UINT32	CM_L3_AON_CLKSTCTRL;		// 0x0418
+	UINT32	CM_AUTOIDLE_DPLL_MPU;		// 0x041C
+	UINT32	CM_IDLEST_DPLL_MPU;			// 0x0420
+	UINT32	CM_SSC_DELTAMSTEP_DPLL_MPU;	// 0x0424
+	UINT32	CM_SSC_MODFREQDIV_DPLL_MPU;	// 0x0428
+	UINT32	CM_CLKSEL_DPLL_MPU;			// 0x042C
+	UINT32	CM_AUTOIDLE_DPLL_DDR;		// 0x0430
+	UINT32	CM_IDLEST_DPLL_DDR;			// 0x0434
+	UINT32	CM_SSC_DELTAMSTEP_DPLL_DDR;	// 0x0438
+	UINT32	CM_SSC_MODFREQDIV_DPLL_DDR;	// 0x043C
+	UINT32	CM_CLKSEL_DPLL_DDR;			// 0x0440
+	UINT32	CM_AUTOIDLE_DPLL_DISP;		// 0x0444
+	UINT32	CM_IDLEST_DPLL_DISP;		// 0x0448
+	UINT32	CM_SSC_DELTAMSTEP_DPLL_DISP;// 0x044C
+	UINT32	CM_SSC_MODFREQDIV_DPLL_DISP;// 0x0450
+	UINT32	CM_CLKSEL_DPLL_DISP;		// 0x0454
+	UINT32	CM_AUTOIDLE_DPLL_CORE;		// 0x0458
+	UINT32	CM_IDLEST_DPLL_CORE;		// 0x045C
+	UINT32	CM_SSC_DELTAMSTEP_DPLL_CORE;// 0x0460
+	UINT32	CM_SSC_MODFREQDIV_DPLL_CORE;// 0x0464
+	UINT32	CM_CLKSEL_DPLL_CORE;		// 0x0468
+	UINT32	CM_AUTOIDLE_DPLL_PER;		// 0x046C
+	UINT32	CM_IDLEST_DPLL_PER;			// 0x0470
+	UINT32	CM_SSC_DELTAMSTEP_DPLL_PER;	// 0x0474
+	UINT32	CM_SSC_MODFREQDIV_DPLL_PER;	// 0x0478
+	UINT32	CM_CLKDCOLDO_DPLL_PER;		// 0x047C
+	UINT32	CM_DIV_M4_DPLL_CORE;		// 0x0480
+	UINT32	CM_DIV_M5_DPLL_CORE;		// 0x0484
+	UINT32	CM_CLKMODE_DPLL_MPU;		// 0x0488
+	UINT32	CM_CLKMODE_DPLL_PER;		// 0x048C
+	UINT32	CM_CLKMODE_DPLL_CORE;		// 0x0490
+	UINT32	CM_CLKMODE_DPLL_DDR;		// 0x0494
+	UINT32	CM_CLKMODE_DPLL_DISP;		// 0x0498
+	UINT32	CM_CLKSEL_DPLL_PERIPH;		// 0x049C
+	UINT32	CM_DIV_M2_DPLL_DDR;			// 0x04A0
+	UINT32	CM_DIV_M2_DPLL_DISP;		// 0x04A4
+	UINT32	CM_DIV_M2_DPLL_MPU;			// 0x04A8
+	UINT32	CM_DIV_M2_DPLL_PER;			// 0x04AC
+	UINT32	CM_WKUP_WKUP_M3_CLKCTRL;	// 0x04B0
+	UINT32	CM_WKUP_UART0_CLKCTRL;		// 0x04B4
+	UINT32	CM_WKUP_I2C0_CLKCTRL;		// 0x04B8
+	UINT32	tCM_WKUP_ADC_TSC_CLKCTRL;	// 0x04BC
+	UINT32	tCM_WKUP_SMARTREFLEX0_CLKCTRL;// 0x04C0
+	UINT32	CM_WKUP_TIMER1_CLKCTRL;		// 0x04C4
+	UINT32	CM_WKUP_SMARTREFLEX1_CLKCTRL;// 0x04C8
+	UINT32	CM_L4_WKUP_AON_CLKSTCTRL;	// 0x04CC
+	UINT32	CM_WKUP_WDT0_CLKCTRL;		// 0x04D0
+	UINT32	CM_WKUP_WDT1_CLKCTRL;		// 0x04D4
+	UINT32	CM_DIV_M6_DPLL_CORE;		// 0x04D8
+	UINT32  res_04DC_4FC[9];
+// CM_DPLL
+	UINT32	res_500;
+	UINT32	CLKSEL_TIMER7_CLK;			// 0x0504
+	UINT32	CLKSEL_TIMER2_CLK;			// 0x0508
+	UINT32	CLKSEL_TIMER3_CLK;			// 0x050C
+	UINT32	CLKSEL_TIMER4_CLK;			// 0x0510
+	UINT32	CM_MAC_CLKSEL;				// 0x0514
+	UINT32	CLKSEL_TIMER5_CLK;			// 0x0518
+	UINT32	CLKSEL_TIMER6_CLK;			// 0x051C
+	UINT32	CM_CPTS_RFT_CLKSEL;			// 0x0520
+	UINT32	res_524;
+	UINT32	CLKSEL_TIMER1MS_CLK;		// 0x0528
+	UINT32	CLKSEL_GFX_FCLK;			// 0x052C
+	UINT32	CLKSEL_ICSS_OCP_CLK;		// 0x0530
+	UINT32	CLKSEL_LCDC_PIXEL_CLK;		// 0x0534
+	UINT32	CLKSEL_WDT1_CLK;			// 0x0538
+	UINT32	CLKSEL_GPIO0_DBCLK;			// 0x053C
+	UINT32	res_540_5FC[48];
+// CM_MPU
+	UINT32	CM_MPU_CLKSTCTRL;			// 0x0600
+	UINT32	CM_MPU_MPU_CLKCTRL;			// 0x0604
+	UINT32	res_608_6FC[62];
+// CM_DEVICE
+	UINT32	CM_CLKOUT_CTRL;				// 0x0700
+	UINT32	res_704_7FC[63];
+// CM_RTC
+	UINT32	CM_RTC_RTC_CLKCTRL;			// 0x0800
+	UINT32	CM_RTC_CLKSTCTRL;			// 0x0804
+	UINT32	res_808_8FC[62];
+// CM_GFX
+	UINT32	CM_GFX_L3_CLKSTCTRL;		// 0x0900
+	UINT32	CM_GFX_GFX_CLKCTRL;			// 0x0904
+	UINT32	CM_GFX_BITBLT_CLKCTRL;		// 0x0908
+	UINT32	CM_GFX_L4LS_GFX_CLKSTCTRL;// 0x090C
+	UINT32	CM_GFX_MMUCFG_CLKCTRL;		// 0x0910
+	UINT32	CM_GFX_MMUDATA_CLKCTRL;		// 0x0914
+	UINT32	res_918_9FC[58];
+// CM_CEFUSE
+	UINT32	CM_CEFUSE_CLKSTCTRL;			// 0x0A00
+	UINT32	res_A04_A1C[7];
+	UINT32	CM_CEFUSE_CEFUSE_CLKCTRL;	// 0x0A20
+	UINT32	res_A24_AFC[55];
+// OCP_SOCKET_PRM
+	UINT32	REVISION_PRM;				// 0x0B00
+	UINT32	PRM_IRQSTATUS_MPU;			// 0x0B04
+	UINT32	PRM_IRQENABLE_MPU;			// 0x0B08
+	UINT32	PRM_IRQSTATUS_M3;			// 0x0B0C
+	UINT32	PRM_IRQENABLE_M3;			// 0x0B10
+	UINT32	res_B14_BFC[59];
+// PRM_PER
+	UINT32	RM_PER_RSTCTRL;				// 0x0C00
+	UINT32	RM_PER_RSTST;				// 0x0C04
+	UINT32	PM_PER_PWRSTST;				// 0x0C08
+	UINT32	PM_PER_PWRSTCTRL;			// 0x0C0C
+	UINT32	res_C10_CFC[60];
+// PRM_WKUP
+	UINT32	RM_WKUP_RSTCTRL;			// 0x0D00
+	UINT32	PM_WKUP_PWRSTCTRL;			// 0x0D04
+	UINT32	PM_WKUP_PWRSTST;			// 0x0D08
+	UINT32	RM_WKUP_RSTST;				// 0x0D0C
+	UINT32	res_D10_DFC[60];
+// PRM_MPU
+	UINT32	PM_MPU_PWRSTCTRL;			// 0x0E00
+	UINT32	PM_MPU_PWRSTST;				// 0x0E04
+	UINT32	RM_MPU_RSTST;				// 0x0E08
+	UINT32	res_E0C_EFC[61];
+// PRM_DEVICE
+	UINT32	PRM_RSTCTRL;				// 0x0F00
+	UINT32	PRM_RSTTIME;				// 0x0F04
+	UINT32	PRM_RSTST;					// 0x0F08
+	UINT32	PRM_SRAM_COUNT;				// 0x0F0C
+	UINT32	PRM_LDO_SRAM_CORE_SETUP;	// 0x0F10
+	UINT32	PRM_LDO_SRAM_CORE_CTRL;		// 0x0F14
+	UINT32	PRM_LDO_SRAM_MPU_SETUP;		// 0x0F18
+	UINT32	PRM_LDO_SRAM_MPU_CTRL;		// 0x0F1C
+	UINT32	res_F20_FFC[56];
+// PRM_RTC
+	UINT32	PM_RTC_PWRSTCTRL;			// 0x1000
+	UINT32	PM_RTC_PWRSTST;				// 0x1004
+	UINT32	res_1008_10FC[62];
+// PRM_GFX
+	UINT32	PM_GFX_PWRSTCTRL;			// 0x1100
+	UINT32	RM_GFX_RSTCTRL;				// 0x1104
+	UINT32	res_1108_110C[2];
+	UINT32	PM_GFX_PWRSTST;				// 0x1110
+	UINT32	RM_GFX_RSTST;				// 0x1114
+	UINT32	res_1118_11FC[58];
+// PRM_CEFUSE
+	UINT32	PM_CEFUSE_PWRSTCTRL;		// 0x1200
+	UINT32	PM_CEFUSE_PWRSTST;			// 0x1204
+	UINT32	res_1208_12FC[62];
+} AM33X_PRCM_REGS;
+struct lcdc {
+	LCDC_REGS			*regs;     // virtual address of LCDC regs
+	AM33X_PRCM_REGS		*prcmregs; // virtual address of PRCM regs vargese
+	unsigned int				phys_base; // phy address of regs
+	unsigned int				fb_pa;     // phy address of fb
+	unsigned int				fb_size;   // total siz of fb
+	void				*fb_va;    // virtual address of fb
+	unsigned int				fb_cur_win_size; // size of the FB window for current mode
+
+	struct display_panel    *panel;
+	unsigned int				clk;
+	void				*palette_virt;
+	unsigned int				palette_phys;
+	int					palette_code;
+	int					palette_size;
+	unsigned int				irq_mask;
+	unsigned int				reset_count;
+	enum fb_update_mode	update_mode;
+	enum lcdc_load_mode	load_mode;
+
+//	HANDLE				last_frame_complete;
+//	HANDLE				palette_load_complete;
+//	HANDLE				lcd_int_event;
+	unsigned int				lcdc_irq;
+	uint32_t				sys_interrupt; //
+//	HANDLE				lcd_int_thread;
+
+    int 				dma_burst_sz;
+    int					dma_fifo_thresh;
+
+	int 				currentBLLevel;
+	int 				backlightOn;
+
+	//enum fb_pack_format pack_format;
+
+	int					color_mode;
+};
+
+struct lcdc lcdc_device;
+
+
+#define IMAGE_WINCE_DISPLAY_SIZE        	0x01F00000
+#define IMAGE_WINCE_DISPLAY_PALETTE_PA		0x8EF00000
+
+int setup_hdmi(disp_adapter_t *adapter, am335x_hdmi_t *dev);
+int init_hdmi(disp_adapter_t *adapter, omapl1xx_context_t *omapl1xx,struct lcdc *lcdc);
+int uninit_hdmi(disp_adapter_t *adapter, omapl1xx_context_t *omapl1xx);
+
+#define CLKSTCTRL_CLKTRCTRL_SHIFT    (0)
+#define ClKCTRL_MODULEMODE_SHIFT    (0)
+#define ClKCTRL_IDLEST_SHIFT        (16)
+#define CLKSTCTRL_CLKTRCTRL_MASK     (0x3 << CLKSTCTRL_CLKTRCTRL_SHIFT)
+#define CLKSTCTRL_CLKTRCTRL_SW_WKUP  (0x2 << CLKSTCTRL_CLKTRCTRL_SHIFT)
+#define ClKCTRL_MODULEMODE_MASK     (0x3 << ClKCTRL_MODULEMODE_SHIFT)
+#define ClKCTRL_MODULEMODE_EN       (0x2 << ClKCTRL_MODULEMODE_SHIFT)
+#define ClKCTRL_IDLEST_DIS          (0x3 << ClKCTRL_IDLEST_SHIFT)
+
+#define CLKSEL_LCDC_PIXEL_CLK_SHIFT         (0)
+#define CLKSEL_LCDC_PIXEL_CLK_MASK          (0X3 << CLKSEL_LCDC_PIXEL_CLK_SHIFT)
+
+#define DPLL_MULT_SHIFT                     (8)
+#define DPLL_MULT_MASK                      (0xFFF << DPLL_MULT_SHIFT)
+#define DPLL_MULT(x)                        ((0xFFF & (x)) << DPLL_MULT_SHIFT)
+
+#define DPLL_DIV_SHIFT                      (0)
+#define DPLL_DIV_MASK                       (0x7F << DPLL_DIV_SHIFT)
+#define DPLL_DIV(x)                         ((0x7F & (x)) << DPLL_DIV_SHIFT)
+
+#define DPLL_ADPLLS_CLKOUT_DIV_SHIFT        0
+#define DPLL_ADPLLS_CLKOUT_DIV_MASK         (0x1F << DPLL_ADPLLS_CLKOUT_DIV_SHIFT)
+#define DPLL_ADPLLS_CLKOUT_DIV(x)           ((0x1F & (x)) << DPLL_ADPLLS_CLKOUT_DIV_SHIFT)
+
+#define DPLL_ADPLLJ_CLKOUT_DIV_SHIFT        0
+#define DPLL_ADPLLJ_CLKOUT_DIV_MASK         (0x7F << DPLL_ADPLLJ_CLKOUT_DIV_SHIFT)
+#define DPLL_ADPLLJ_CLKOUT_DIV(x)           ((0x7F & (x)) << DPLL_ADPLLJ_CLKOUT_DIV_SHIFT)
+
+typedef enum OMAP_ClockId
+{
+    SYS_CLK=0,
+    MPU_CLK,
+    IVA_CLK,
+    CORE_CLK,
+    SGX_CLK,
+    LCD_PCLK
+}OMAP_CLOCKID;
+
+
+#define CM_PER					(AM33X_PRCM_REGS_PA + 0x0)
+#define CM_CLKSEL_LCDC_PIXEL_CLK        (CM_PER + 0x34)
+
+/* DISP Freq is 300 MHZ */
+/* Set Fdll = 600 MHZ , Fdll = M * 2 * CLKINP/ N + 1; clkout = Fdll /(2 * M2) */
+#define PLL_BYPASS_MODE			0x4
+#define DISPPLL_M		25
+#define DISPPLL_N		1
+#define LCDC_PIXEL_CLK_DISP_CLKOUTM2    0x0
+
+#endif

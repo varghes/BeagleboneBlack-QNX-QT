@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<module name="wdtkick">
+  <classification>Driver</classification>
+  <description>
+    <short> Watchdog Timer Module</short>
+    <abstract><![CDATA[
+		The wdtkick is the Watchdog Timer Module for OMAP3530
+	        ]]></abstract>
+  </description>
+  <supports>
+    <availability>
+      <cpu isa="ppc">
+        <byteOrder>be</byteOrder>
+      <byteOrder>be.spe</byteOrder>
+        </cpu>
+        <cpu isa="sh">
+          <byteOrder>le</byteOrder>
+        </cpu>
+        <cpu isa="arm">
+          <byteOrder>le</byteOrder>
+          <byteOrder>le.v7</byteOrder>
+        </cpu>
+        <cpu isa="x86"/>
+        <cpu isa="mips">
+          <byteOrder>le</byteOrder>
+          <byteOrder>be</byteOrder>
+        </cpu>
+    </availability>
+  </supports>
+  <contents>
+    <component id="wdtkick" generated="true">
+      <location basedir="arm/le">wdtkick</location>
+      <location basedir="arm/le.v7">wdtkick</location>
+    </component>
+  </contents>
+</module>

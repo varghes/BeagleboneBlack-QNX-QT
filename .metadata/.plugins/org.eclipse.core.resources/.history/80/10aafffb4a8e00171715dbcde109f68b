@@ -1,0 +1,441 @@
+/*
+ * $QNXLicenseC:
+ * Copyright 2010, QNX Software Systems.
+ * Copyright 2017 Varghese Alphonse
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"). You
+ * may not reproduce, modify or distribute this software except in
+ * compliance with the License. You may obtain a copy of the License
+ * at: http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OF ANY KIND, either express or implied.
+ *
+ * This file may contain contributions from others, either as
+ * contributors under the License or as licensors under other terms.
+ * Please review this entire file for other proprietary rights or license
+ * notices, as well as the QNX Development Suite License Guide at
+ * http://licensing.qnx.com/license-guide/ for other information.
+ * $
+ */
+
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+#include <unistd.h>
+#include <atomic.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sched.h>
+#include <hw/i2c.h>
+#include <arm/am335x.h>
+#include "omapl1xx.h"
+#include "hdmi.h"
+
+
+
+
+
+static int
+omapl1xx_get_modeinfo(disp_adapter_t *adapter,
+    int dispno, disp_mode_t mode, disp_mode_info_t *info)
+{
+	omapl1xx_context_t	*omapl1xx = adapter->ms_ctx;
+	slogf(_SLOGC_GRAPHICS, _SLOG_INFO, "omapl1xx_get_modeinfo");
+	memset(info, 0, sizeof(*info));
+	info->size = sizeof(*info);
+	info->mode = mode;
+	switch (mode) {
+		case 16:
+			info->pixel_format = DISP_SURFACE_FORMAT_RGB565;
+			break;
+		case 24:
+			info->pixel_format = DISP_SURFACE_FORMAT_RGB888;
+			break;
+		case 32:
+			info->pixel_format = DISP_SURFACE_FORMAT_ARGB8888;
+			break;
+		default:
+			return -1;
+	}
+
+	info->xres = omapl1xx->width;
+	info->yres =omapl1xx->height;
+
+    info->u.fixed.refresh[0] = LCD_DFT_FRAMERATE;
+    info->u.fixed.refresh[1] = 0;
+
+	return 0;
+}
+
+
+static int
+omapl1xx_set_mode(disp_adapter_t *adapter, int dispno, disp_mode_t mode,
+    disp_crtc_settings_t *settings, disp_surface_t *surf, unsigned flags)
+{
+	slogf(_SLOGC_GRAPHICS, _SLOG_INFO, "omapl1xx_set_mode");
+	return 0;
+}
+
+
+static int
+omapl1xx_get_modelist(disp_adapter_t *adapter, int dispno, unsigned short *list,
+    int index, int size)
+{
+
+    static unsigned modes[] = {16, 24,32};
+       int i, j = 0;
+   	slogf(_SLOGC_GRAPHICS, _SLOG_INFO, "omapl1xx_get_modelist");
+       for (i=index; j<size-1 && i < sizeof(modes)/sizeof(modes[0]); i++)
+			list[j++] = modes[i];
+
+	list[j] = DISP_MODE_LISTEND;
+
+	return 0;
+}
+
+int
+omapl1xx_set_display_offset(disp_adapter_t *adapter,
+    int dispno, unsigned offset, int wait_vsync)
+{
+
+	return 0;
+}
+
+
+
+
+//#define TEST_DISPLAY 1
+static int
+omapl1xx_mode_init(disp_adapter_t *adapter, char *optstring)
+{
+	omapl1xx_context_t	*omapl1xx;
+	uint32_t			 lcdcfg;
+	uint32_t			 framebuffer_addr=0;
+	uint32_t framebuffer = 0;
+	uint32_t dwPixelFormat = 0;
+	uint32_t Lcd_Width = 0;
+	uint32_t Lcd_Height = 0;
+	uint32_t dwLength = 0;
+	uint32_t   x, y;
+    unsigned char* pChar;
+    uint32_t val;
+
+	slogf(_SLOGC_GRAPHICS, _SLOG_INFO, "omapl1xx_mode_init");
+	if (adapter->shmem == NULL)
+	{
+		if ((omapl1xx = calloc(1, sizeof (*omapl1xx))) == NULL)
+		{
+			fprintf(stderr, "+ %s %d: out of memory\n", __FUNCTION__, __LINE__);
+			return -1;
+		}
+
+		omapl1xx->free_context = 1;
+	} 
+	else
+	{
+		omapl1xx = adapter->shmem;
+		memset(omapl1xx, 0, sizeof (*omapl1xx));
+	}
+
+	adapter->ms_ctx = omapl1xx;
+	adapter->vsync_counter = &omapl1xx->vsync_counter;
+
+	omapl1xx->adapter = adapter;
+	omapl1xx->err = 0;
+
+	/* Register with the display utility lib */
+	if (disp_register_adapter(adapter) == -1)
+	{
+		slogf(_SLOGC_GRAPHICS, _SLOG_INFO,"+ %s %d: unable to register with display lib\n", __FUNCTION__, __LINE__);
+		if (omapl1xx->free_context)
+		{
+			free(omapl1xx);
+		}
+		return -1;
+	}
+
+	get_config_data(omapl1xx, optstring);
+//LCD settings Register mapping
+	lcdc_device.regs =(LCDC_REGS*) disp_mmap_device_memory(OMAPL1xx_LCD_BASE, OMAPL1xx_LCD_SIZE, PROT_READ | PROT_WRITE | PROT_NOCACHE, 0);
+	if (lcdc_device.regs == NULL)
+	{
+		slogf(_SLOGC_GRAPHICS, _SLOG_INFO,"+ %s %d: mapping failed\n", __FUNCTION__, __LINE__);
+		goto fail;
+	}
+//power registers mapping
+	lcdc_device.prcmregs =(AM33X_PRCM_REGS*) disp_mmap_device_memory(AM33X_PRCM_REGS_PA, 0x1208, PROT_READ | PROT_WRITE | PROT_NOCACHE, 0);
+	if (lcdc_device.prcmregs == NULL)
+	{
+		slogf(_SLOGC_GRAPHICS, _SLOG_INFO,"+ %s %d: mapping failed\n", __FUNCTION__, __LINE__);
+		goto fail;
+	}
+//clock
+			val = lcdc_device.prcmregs->CM_PER_LCDC_CLKSTCTRL & ~CLKSTCTRL_CLKTRCTRL_MASK;
+			lcdc_device.prcmregs->CM_PER_LCDC_CLKSTCTRL=val|CLKSTCTRL_CLKTRCTRL_SW_WKUP;
+
+			val = lcdc_device.prcmregs->CM_PER_LCDC_CLKCTRL & ~ClKCTRL_MODULEMODE_MASK;
+			lcdc_device.prcmregs->CM_PER_LCDC_CLKCTRL=val|ClKCTRL_MODULEMODE_EN;
+			 while ((lcdc_device.prcmregs->CM_PER_LCDC_CLKCTRL & ClKCTRL_IDLEST_DIS)==ClKCTRL_IDLEST_DIS);
+//clock ends
+
+	slogf(_SLOGC_GRAPHICS, _SLOG_INFO,"HDMI Init\n");
+	if (init_hdmi(adapter, omapl1xx,&lcdc_device) != 0)
+		slogf(_SLOGC_GRAPHICS, _SLOG_INFO,"HDMI error \n");
+	lcdc_device.regs->RASTER_CTRL |= LCDC_RASTER_CTRL_LCD_EN;
+
+	dwPixelFormat = DISPC_PIXELFORMAT_RGB16;
+	Lcd_Width= omapl1xx->width;
+	Lcd_Height=omapl1xx->height;
+    dwLength = 2 * Lcd_Width * Lcd_Height;
+    framebuffer_addr = IMAGE_DISPLAY_PA;
+	// Get the frame buffer
+#ifdef TEST_DISPLAY
+
+    framebuffer = (uint32_t) disp_mmap_device_memory(framebuffer_addr, dwLength, PROT_READ | PROT_WRITE | PROT_NOCACHE, 0);;
+    //at91sam9xx->vidptr
+    if (framebuffer == NULL)
+	{
+		fprintf(stderr, "+ %s %d: mapping failed\n", __FUNCTION__, __LINE__);
+		goto fail;
+	}
+
+	pChar = (unsigned char*)framebuffer;
+	for (y= 0; y < Lcd_Height; y++)
+	{
+	     for( x = 0; x < Lcd_Width; x++ )
+	     {
+			   *pChar++ = 0x18;
+	           *pChar++ = 0xFC;
+	     }
+	}
+	 fprintf(stderr, "infinate loop");
+	for(;;)
+#else
+		omapl1xx->vidsize=dwLength;
+	adapter->adapter_ram = omapl1xx->vidsize;
+		omapl1xx->vidptr =  disp_mmap_device_memory(framebuffer_addr, dwLength, PROT_READ | PROT_WRITE | PROT_NOCACHE, 0);;
+		    //at91sam9xx->vidptr
+		    if (omapl1xx->vidptr  == NULL)
+			{
+		    	slogf(_SLOGC_GRAPHICS, _SLOG_INFO,"+ %s %d: mapping failed\n", __FUNCTION__, __LINE__);
+				goto fail;
+			}
+#endif
+		    return 0;
+
+fail:
+	if (lcdc_device.regs) {
+		munmap_device_memory(lcdc_device.regs, OMAPL1xx_LCD_SIZE);
+	}
+
+	if (lcdc_device.prcmregs) {
+			munmap_device_memory(lcdc_device.prcmregs, 0x1208);
+		}
+
+	if(omapl1xx->vidptr){
+		munmap_device_memory(omapl1xx->vidptr, dwLength);
+	}
+	if (omapl1xx->free_context) {
+		free(omapl1xx);
+	}
+
+	disp_unregister_adapter(adapter);
+
+	return -1;
+}
+
+static void
+omapl1xx_mode_fini(disp_adapter_t *adapter)
+{
+	omapl1xx_context_t	*omapl1xx = adapter->ms_ctx;
+	slogf(_SLOGC_GRAPHICS, _SLOG_INFO, "omapl1xx_mode_fini");
+
+	if (omapl1xx) {
+		if (	lcdc_device.regs) {
+			munmap_device_memory(lcdc_device.regs, OMAPL1xx_LCD_SIZE);
+		}
+
+		if (lcdc_device.prcmregs) {
+			munmap_device_memory(lcdc_device.prcmregs, 0x1208);
+		}
+
+		if (omapl1xx->vidptr) {
+			munmap_device_memory(omapl1xx->vidptr, (omapl1xx->width*omapl1xx->height*2));
+		}
+
+		if (omapl1xx->free_context) {
+			free(omapl1xx);
+		}
+		disp_unregister_adapter(adapter);
+		adapter->ms_ctx = NULL;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+#define OMAP_HCURSOR_RGB565_BPP 2
+
+int omap_set_hw_cursor(disp_adapter_t *adapter, int dispno, uint8_t * bmp0,
+		uint8_t * bmp1, unsigned color0, unsigned color1, int hotspot_x,
+		int hotspot_y, int size_x, int size_y, int bmp_stride) {
+	omapl1xx_context_t *o_ctx = adapter->ms_ctx;
+	uint16_t code;
+	int byte = 0, bit;
+	int x, y;
+	uint32_t transparent_color;
+//	TRACE;
+#ifdef HWCURSOR
+
+	/* use sw cursor  hcusror is set in configuration file omap35xx.conf*/
+	if (o_ctx->hcursor != 1) {
+		DEBUG_MSG("hw_cursor disabled in config file");
+		return -1;
+	}
+
+	/* cursor fits with in the display */
+	if (size_x > o_ctx->width || size_y > o_ctx->height)
+		return -1;
+
+	/* set width and height */
+	o_ctx->cursor_width = size_x;
+	o_ctx->cursor_height = size_y;
+
+	/* convert colors to rgb565 */
+	color0 = disp_color_translate(NULL, DISP_SURFACE_FORMAT_RGB888,
+			DISP_SURFACE_FORMAT_RGB565, color0);
+	color1 = disp_color_translate(NULL, DISP_SURFACE_FORMAT_RGB888,
+			DISP_SURFACE_FORMAT_RGB565, color1);
+
+
+	/* create unique color for transpart color,
+	 * increment color0 and check it is not color1
+	 */
+	transparent_color = color0 + 2;
+	if (transparent_color == color1)
+		transparent_color = color0 + 4;
+
+	/* allocate memory for hardware cursor image */
+	if (o_ctx->cursor_vptr == NULL || o_ctx->cursor_size != (size_x * size_y
+			* OMAP_HCURSOR_RGB565_BPP)) {
+		if (o_ctx->cursor_vptr)
+			munmap(o_ctx->cursor_vptr, o_ctx->cursor_size);
+		o_ctx->cursor_size = size_x * size_y * OMAP_HCURSOR_RGB565_BPP;
+		o_ctx->cursor_vptr = mmap(0, o_ctx->cursor_size, PROT_READ|PROT_WRITE|(o_ctx->cached_mem ? 0 : PROT_NOCACHE)
+				, MAP_ANON|MAP_PHYS|MAP_PRIVATE, NOFD, 0);
+		if (o_ctx->cursor_vptr == MAP_FAILED)
+			return -1;
+		o_ctx->cursor_paddr = disp_phys_addr(o_ctx->cursor_vptr);
+	}
+
+	/* combine bitmaps and transparent color to create rgb565 image */
+	for (y = 0; y < size_y; y++) {
+		/* next line in bitmap */
+		byte = y * bmp_stride;
+		bit = 0x80; /* MSB */
+		for (x = 0; x < size_x; x++) {
+			code = transparent_color;
+			if (bmp0[byte] & bit)
+				code = color0;
+			if (bmp1[byte] & bit)
+				code = color1;
+			o_ctx->cursor_vptr[((y*size_x)+x)] = code;
+			/* index into source bitmops */
+			bit >>= 1;
+			if (bit == 0) {
+				/* next byte */
+				bit = 0x80;
+				byte++;
+			}
+		}
+	}
+
+	/* OMAP_DISPC_CONFIG bits
+	 *
+	 * TCKLCDSELECTION (?<<11) Transparency color key selection (LCD output) RW 0
+	 *	0x0: Graphics destination transparency color key selected
+	 *	0x1: Video source transparency color key selected
+	 * TCKLCDENABLE (?<<10) Transparency color key enabled (LCD output) RW 0
+	 *  	0x0: Disable the transparency color key for the LCD
+	 *	0x1: Enable the transparency color key for the LCD
+	 */
+	*OMAP_DISPC_CONFIG |= (1<<10);
+
+	/* set transparent color */
+	*OMAP_DISPC_TRANS_COLOR = transparent_color;
+	/* set GFX buffer to the cursor image */
+	*OMAP_DISPC_GFX_BA0 = o_ctx->cursor_paddr;
+	/*
+	 *      0x6<<1 for rgb565
+	 */
+	*OMAP_DISPC_GFX_ATTRIBUTES |= (0x06 << 1);
+	/* Cursor image size */
+	*OMAP_DISPC_GFX_SIZE = (size_y-1) << 16 | (size_x-1);
+	*OMAP_DISPC_GFX_ROW_INC = 1;
+	*OMAP_DISPC_GFX_PIXEL_INC = 1;
+#endif
+
+	return 0;
+}
+
+void omap_enable_hw_cursor(disp_adapter_t *adapter, int dispno) {
+	omapl1xx_context_t *o_ctx = adapter->ms_ctx;
+//	TRACE;
+
+}
+
+void omap_disable_hw_cursor(disp_adapter_t *adapter, int dispno) {
+	omapl1xx_context_t *o_ctx = adapter->ms_ctx;
+//	TRACE;
+
+}
+
+void omap_set_hw_cursor_pos(disp_adapter_t *adapter, int dispno, int x, int y) {
+	omapl1xx_context_t *o_ctx = adapter->ms_ctx;
+//	TRACE;
+
+
+}
+
+
+
+
+
+
+
+
+
+
+int
+devg_get_modefuncs(disp_adapter_t *adapter, disp_modefuncs_t *funcs, int tabsize)
+{
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, init, omapl1xx_mode_init, tabsize); //ok
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, fini, omapl1xx_mode_fini, tabsize); //ok
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, module_info, omapl1xx_module_info, tabsize);
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, get_modeinfo, omapl1xx_get_modeinfo, tabsize);
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, get_modelist, omapl1xx_get_modelist, tabsize);
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, set_mode, omapl1xx_set_mode, tabsize);
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, set_display_offset, omapl1xx_set_display_offset, tabsize);
+
+/*	 DISP_ADD_FUNC(disp_modefuncs_t, funcs, set_hw_cursor, omap_set_hw_cursor,tabsize);
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, enable_hw_cursor,omap_enable_hw_cursor, tabsize);
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, disable_hw_cursor,omap_disable_hw_cursor, tabsize);
+	DISP_ADD_FUNC(disp_modefuncs_t, funcs, set_hw_cursor_pos,omap_set_hw_cursor_pos, tabsize);
+
+*/
+
+	return 0;
+}
+
+
+
+
+

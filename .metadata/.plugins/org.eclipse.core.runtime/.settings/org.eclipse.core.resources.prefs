@@ -1,0 +1,5 @@
+#Sat Nov 12 22:30:20 IST 2016
+version=1
+eclipse.preferences.version=1
+description.buildorder=bsp-ti-beaglebone-src/bsp-ti-beaglebone
+description.defaultbuildorder=false

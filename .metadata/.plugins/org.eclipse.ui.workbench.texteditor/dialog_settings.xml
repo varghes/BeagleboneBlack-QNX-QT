@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
+		<item key="DIALOG_X_ORIGIN" value="919"/>
+		<item key="DIALOG_FONT_NAME" value="1|Segoe UI|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|Segoe UI"/>
+		<item key="DIALOG_HEIGHT" value="320"/>
+		<item key="DIALOG_Y_ORIGIN" value="277"/>
+		<item key="DIALOG_WIDTH" value="257"/>
+	</section>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item key="wholeword" value="false"/>
+		<item key="incremental" value="false"/>
+		<item key="isRegEx" value="false"/>
+		<item key="selection" value="qt_v7_demo"/>
+		<item key="wrap" value="false"/>
+		<item key="casesensitive" value="false"/>
+		<list key="findhistory">
+			<item value="qt_v7_demo"/>
+			<item value="phcalc"/>
+			<item value="browser"/>
+			<item value="display.conf"/>
+			<item value="qtdemo"/>
+			<item value="pdebug"/>
+			<item value="qconn"/>
+			<item value="pwm"/>
+		</list>
+		<list key="replacehistory">
+			<item value="reg_read(adapter, dev,"/>
+			<item value="fprintf(stderr,"/>
+			<item value="UINT32"/>
+			<item value="unsigned int"/>
+		</list>
+	</section>
+</section>

@@ -1,0 +1,24 @@
+%C - Sound driver for the McASP interface  
+
+This is a DLL of the io-audio system.
+
+options:
+i2c_addr         : slave address of first i2c device (default = 0x18)
+clk              : "master" or "slave" (default = "master")
+mcasp            : 2 or 5 (default = 2)
+i2c_dev          : i2c device to connect to (0 for i2c0, 2 for i2c2) (default = 0)
+tx_voices        : Tx channels (default = 2)
+rx_voices        : Rx channels (default = 2)
+rate             : clock rate (45158400 or 22579200) (default = 45158400)
+protocol         : "tdm_i2s" or "tdm_lj" - i2s or left justified
+sample_size      :  2 or 4 (in bytes)
+hxclk_io		 : 1: set AHXCLK as output (default = 0)
+mclk			 : clock provided to codec (in Hz) (default = 45158400)
+
+Currently the driver defaults to McASP2, stereo out and in
+
+Example:
+# For McASP2 (default)
+io-audio -vvvv -d mcasp-j5_aic3106 mcasp=2
+
+NOTE: For Gen1,RevB of J5 EVK, mclk=24576000Hz

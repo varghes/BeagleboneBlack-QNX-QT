@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<module name="devi-43wvfig">
+  <classification>Driver</classification>
+  <description>
+    <short>Photon Input Manager for i.MX28EVK/MCIMX28LCD board</short>
+    <abstract>
+<![CDATA[
+					The devi-43wvfig is a Photon input manager for the i.MX28EVK MCIMX28LCD LCD daughterboard.
+	        ]]>
+    </abstract>
+  </description>
+  <supports>
+    <availability>
+      <cpu isa="arm"/>
+    </availability>
+  </supports>
+  <contents>
+    <component id="devi-43wvfig" generated="true">
+      <location basedir="nto/x86/o">devi-43wvfig</location>
+    </component>
+  </contents>
+  <requires>
+    <part build="false" location="hardware/devi"/>
+    <part build="true" rootMacro="DEVILIB_ROOT" location="hardware/devi/lib"/>
+    <part build="true" rootMacro="KEYMAP_ROOT" location="hardware/devi/keymap"/>
+  </requires>
+</module>

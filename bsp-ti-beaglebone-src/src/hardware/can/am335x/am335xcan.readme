@@ -1,0 +1,972 @@
+*************************************************
+    General CAN Operation & Loopback Testing
+*************************************************
+
+1. Start CAN driver in self-test mode
+
+# dev-can-am335x -t am335xcan1
+
+# ls /dev/can1
+rx0     rx12    rx2     rx6     tx16    tx20    tx24    tx28
+rx1     rx13    rx3     rx7     tx17    tx21    tx25    tx29
+rx10    rx14    rx4     rx8     tx18    tx22    tx26    tx30
+rx11    rx15    rx5     rx9     tx19    tx23    tx27    tx31
+
+In this mode, the transmitter and receiver of the CAN device are looped back.
+The message ID's (MID's) of the transmit and receive device mailboxes are
+configured by default such that:
+
+Device Mailbox  MID
+============================
+RX0/TX16        0x100C0000
+RX1/TX17        0x101C0000
+RX2/TX18        0x102C0000
+RX3/TX19        0x103C0000
+RX4/TX20        0x104C0000
+RX5/TX21        0x105C0000
+RX6/TX22        0x106C0000
+RX7/TX23        0x107C0000
+RX8/TX24        0x108C0000
+RX9/TX25        0x109C0000
+RX10/TX26       0x10AC0000
+RX11/TX27       0x10BC0000
+RX12/TX28       0x10CC0000
+RX13/TX29       0x10DC0000
+RX14/TX30       0x10EC0000
+RX15/TX31       0x10FC0000
+
+Therefore, all messages transmitted with MID 0x101C0000 (TX17) will be
+received by any receivers with a filter for MID 0x101C0000 - RX1 in this case.
+The number of RX/TX devices as well as the MID's are configurable.
+
+2. Run a client application to read CAN messages on the first receive mailbox
+
+# cat /dev/can1/rx0 &
+
+3. Transmit a CAN message to the first recieve device mailbox
+
+# echo testing > /dev/can1/tx16
+testing
+
+# echo testing > /dev/can1/tx16
+testing
+
+NOTE: RX0 and TX16 are configured with the same message ID (MID).
+
+4. Data must be EXACTLY 8 bytes - if it is larger or smaller, no
+CAN message is transmitted (an error is returned from the write() fuction)
+
+# echo test > /dev/can1/tx16
+# echo testimony > /dev/can1/tx16
+
+No data is transmitted/received.
+
+5. Transmit CAN messages to the second receive device mailbox
+
+# echo tstdat1 > /dev/can1/tx17
+# echo tstdat2 > /dev/can1/tx17
+# echo tstdat3 > /dev/can1/tx17
+# echo tstdat4 > /dev/can1/tx17
+
+NOTE: No data is displayed since there is no client reading from the device
+
+6. Run a client application to read CAN messages on the second receive device mailbox
+
+# cat /dev/can1/rx1 &
+
+tstdat1
+tstdat2
+tstdat3
+tstdat4
+
+NOTE: Data previously received by the device is printed to the console.
+
+7. Run a client application to read CAN messages on the last receive device mailbox
+
+# cat /dev/can1/rx15 &
+
+8. Transmit CAN messages to the last receive device mailbox
+
+echo testing > /dev/can1/tx31
+
+testing
+
+9. Attempt to write to a receive device mailbox
+
+# echo testing > /dev/can1/rx5
+
+Nothing happens and write() function returns with an error.
+
+10. Attempt to read from transmit device mailbox
+
+# cat /dev/can1/tx27
+
+/dev/can1/tx27: Not supported
+
+11. Run a stress test on the device
+
+# while true
+> do
+> echo testing > /dev/can1/tx16
+> done
+
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+.
+.
+.
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+
+<ctrl+c> to stop
+
+12. Restart driver with different number of RX/TX devices
+
+slay dev-can-am335x
+# dev-can-am335x -t -r 10 am335xcan1
+# ls /dev/can1
+rx0     rx4     rx8     tx12    tx16    tx20    tx24    tx28
+rx1     rx5     rx9     tx13    tx17    tx21    tx25    tx29
+rx2     rx6     tx10    tx14    tx18    tx22    tx26    tx30
+rx3     rx7     tx11    tx15    tx19    tx23    tx27    tx31
+
+There are now only 10 receive devices and 22 transmit devices.  The
+default MID's change to:
+
+Device Mailbox  MID
+============================
+RX0/TX10    0x100C0000
+RX1/TX11    0x101C0000
+RX2/TX12    0x102C0000
+RX3/TX13    0x103C0000
+RX4/TX14    0x104C0000
+RX5/TX15    0x105C0000
+RX6/TX16    0x106C0000
+RX7/TX17    0x107C0000
+RX8/TX18    0x108C0000
+RX9/TX19    0x109C0000
+TX20        0x10AC0000
+TX21        0x10BC0000
+TX22        0x10CC0000
+TX23        0x10DC0000
+TX24        0x10EC0000
+TX25        0x10FC0000
+TX26        0x110C0000
+TX27        0x111C0000
+TX28        0x112C0000
+TX29        0x113C0000
+TX30        0x114C0000
+TX31        0x115C0000
+
+CAN messages transmitted from devices with matching receivers (RX0-RX9) will behave
+as previously described.  CAN message transmitted from devices with non-matching
+receivers (TX20-TX31) may or may not be received depending on the message filtering
+configuration.  In the default case, messages transmitted from TX20-TX31 will be
+not be received by any receive mailbox.
+
+13. Run a client application to read CAN messages on RX9
+
+cat /dev/can1/rx9 &
+  
+14. Transmit a CAN message to RX9
+
+# echo testing > /dev/can1/tx19
+
+testing
+
+15. Run a client application to read CAN messages on RX0
+
+cat /dev/can1/rx0 &
+
+16. Transmit a CAN message to RX0 from the transmit device with the matching MID
+
+# echo testing > /dev/can1/tx10
+testing
+
+17. Transmit a CAN message from a TX without an accompanying RX mailbox
+
+# echo testing > /dev/can1/tx30
+
+18. Restart the driver with a different CAN message data size
+
+# slay dev-can-am335x
+# dev-can-am335x -t -l 4 am335xcan1
+
+The CAN message data payload is now only 4 bytes instead of the default 8 bytes.
+
+19. Run a client application to read CAN messages on RX0
+
+cat /dev/can1/rx0 &
+
+20. Only messages of 4 bytes are now acceptable
+
+# echo testing > /dev/can1/tx16
+(no data transmitted/received)
+
+# echo abc > /dev/can1/tx16 
+abc<CR>
+
+# echo -n abcd > /dev/can1/tx16
+abcd
+
+21. Restart CAN driver custom unit number
+
+# slay dev-can-am335x
+# dev-can-am335x -t -u5 am335xcan1
+
+# ls /dev/can5
+rx0     rx12    rx2     rx6     tx16    tx20    tx24    tx28
+rx1     rx13    rx3     rx7     tx17    tx21    tx25    tx29
+rx10    rx14    rx4     rx8     tx18    tx22    tx26    tx30
+rx11    rx15    rx5     rx9     tx19    tx23    tx27    tx31
+
+22. Confirm TX/RX continues to work
+
+# cat /dev/can5/rx0 &
+# echo testing > /dev/can5/tx16
+testing
+
+
+23. Driver defaults are pre-defined for the AM335x EVM board, i.e.
+
+dev-can-am335x -t am335xcan1
+
+starts the driver with the proper port and IRQ's for the AM335x EVM board.
+
+Note that the "can1" options are also defaults for the AM335x EVM board, i.e.
+
+dev-can-am335x -t can1
+
+is equivalent to
+
+dev-can-am335x -t am335xcan1
+
+24. The driver IRQ's can be overriden if the driver is run on a different board, i.e.
+
+dev-can-am335x -t can1,port,mem,sysirq,msgirq
+
+
+*************************************************
+    Extended Driver Features & canctl utility
+*************************************************
+The canctl utility provides a commandline mechanism to send devctl's to the CAN
+driver to take advantage of various driver features.
+
+1. Start the CAN driver in selftest mode
+
+# slay dev-can-am335x
+# dev-can-am335x -t can1
+
+2. Get the use message for the canctl utility
+
+# canctl -h
+Utility to send devctl's to a CAN device
+usage: canctl -u#[,rx#][,tx#] [options]
+
+Options:
+-d                print debug info
+-e                print error info
+-f 0x########     set message filter
+-F                get message filter
+-h                print use message
+-m 0x########     set message ID
+-M                get message ID
+-p 0x########     set tx message priority
+-P                get tx message priority
+-r                read extended CAN message
+-t 0x########     set timestamp
+-T                get timestamp
+-u #[,rx#][,tx#]  CAN device to operate on (default /dev/can1/rx0)
+
+3. Send a DEBUG devctl to the driver
+
+# canctl -u1 -d
+
+Debug output is driver define.  In the case of dev-can-am335x, the driver 
+prints all of its register and mailbox values.
+
+CAN REG
+
+***************************************************************************
+AM335X_DCAN_CTL      = 0x   2148E  AM335X_DCAN_ES_EOI   = 0x       7
+AM335X_DCAN_ERRC     = 0x       0  AM335X_DCAN_BTR      = 0x   31803
+AM335X_DCAN_INT      = 0x       0  AM335X_DCAN_TEST     = 0x      10
+AM335X_DCAN_PERR     = 0x     400  AM335X_DCAN_ABOTR    = 0x       0
+AM335X_DCAN_TXRQ_X   = 0x       0  AM335X_DCAN_TXRQ12   = 0x       0
+AM335X_DCAN_TXRQ34   = 0x       0  AM335X_DCAN_TXRQ56   = 0x       0
+AM335X_DCAN_TXRQ78   = 0x       0  AM335X_DCAN_NWDAT_X  = 0x       2
+AM335X_DCAN_NWDAT12  = 0x    2000  AM335X_DCAN_NWDAT34  = 0x       0
+AM335X_DCAN_NWDAT56  = 0x       0  AM335X_DCAN_NWDAT78  = 0x       0
+AM335X_DCAN_INTPND_X = 0x       0  AM335X_DCAN_INTPND12 = 0x       0
+AM335X_DCAN_INTPND34 = 0x       0  AM335X_DCAN_INTPND56 = 0x       0
+AM335X_DCAN_INTPND78 = 0x       0  AM335X_DCAN_MSGVAL_X = 0x       F
+AM335X_DCAN_MSGVAL12 = 0xFFFFFFFF  AM335X_DCAN_MSGVAL34 = 0x       0
+AM335X_DCAN_MSGVAL56 = 0x       0  AM335X_DCAN_MSGVAL78 = 0x       0
+AM335X_DCAN_INTMUX12 = 0x       0  AM335X_DCAN_INTMUX34 = 0x       0
+AM335X_DCAN_INTMUX56 = 0x       0  AM335X_DCAN_INTMUX78 = 0x       0
+AM335X_DCAN_IF1CMD   = 0x  730020  AM335X_DCAN_IF2CMD   = 0x       1
+AM335X_DCAN_IF1MSK   = 0x20000000  AM335X_DCAN_IF2MSK   = 0xFFFFFFFF
+AM335X_DCAN_IF1ARB   = 0xB0FC0000  AM335X_DCAN_IF2ARB   = 0x       0
+AM335X_DCAN_IF1MCTL  = 0x     888  AM335X_DCAN_IF2MCTL  = 0x       0
+AM335X_DCAN_IF1DATA  = 0x4A20E99D  AM335X_DCAN_IF1DATB  = 0x7425BB88
+AM335X_DCAN_IF2DATA  = 0x       0  AM335X_DCAN_IF2DATB  = 0x       0
+AM335X_DCAN_IF3OBS   = 0x       0  AM335X_DCAN_IF3MSK   = 0xFFFFFFFF
+AM335X_DCAN_IF3ARB   = 0x       0  AM335X_DCAN_IF3MCTL  = 0x       0
+AM335X_DCAN_IF3DATA  = 0x       0  AM335X_DCAN_IF3DATB  = 0x       0
+AM335X_DCAN_IF3UPD12 = 0x       0  AM335X_DCAN_IF3UPD56 = 0x       0
+AM335X_DCAN_IF3UPD78 = 0x       0  AM335X_DCAN_IF3UPD78 = 0x       0
+AM335X_DCAN_TIOC     = 0x   4000E  AM335X_DCAN_RIOC     = 0x   40008
+************************************************************************
+
+Mailboxes
+RX Mailboxes
+MB      MASK            ARB             MCTRL           MDL             MDH
+==================================================================================
+RX0     0x20000000      0x900C0000      0x     488      0x74657374      0x696E670A
+RX1     0x20000000      0x901C0000      0x     488      0x5E36E6F9      0xF33DA2FF
+RX2     0x20000000      0x902C0000      0x     488      0xDF7EECDA      0xA9A0485E
+RX3     0x20000000      0x903C0000      0x     488      0x749B1BF1      0x4356A3F6
+RX4     0x20000000      0x904C0000      0x     488      0x28ACD761      0x4DF68080
+RX5     0x20000000      0x905C0000      0x     488      0xE5F04BEF      0xF5314653
+RX6     0x20000000      0x906C0000      0x     488      0xB77E8AAE      0xB894E7D8
+RX7     0x20000000      0x907C0000      0x     488      0x81DF710E      0x20A84D0D
+RX8     0x20000000      0x908C0000      0x     488      0x712A6E3A      0xF31EB233
+RX9     0x20000000      0x909C0000      0x     488      0xF0575795      0x3D01B300
+RX10    0x20000000      0x90AC0000      0x     488      0x7F87E839      0xD9C49FD9
+RX11    0x20000000      0x90BC0000      0x     488      0x 69D251D      0xDDD7F79C
+RX12    0x20000000      0x90CC0000      0x     488      0x99F0865D      0xE2BB63D9
+RX13    0x20000000      0x90DC0000      0x     488      0x81DF710E      0x20A84D0D
+RX14    0x20000000      0x90EC0000      0x     488      0xC1DE2C4D      0x2DFCA891
+RX15    0x20000000      0x90FC0000      0x     488      0x E649E80      0xD65BF5E1
+
+TX Mailboxes
+MB      MASK            ARB             MCTRL           MDL             MDH
+==================================================================================
+TX16    0x20000000      0xB00C0000      0x     888      0x74657374      0x696E670A
+TX17    0x20000000      0xB01C0000      0x     888      0xAF414607      0x 5B12892
+TX18    0x20000000      0xB02C0000      0x     888      0xFF3C5B68      0x60AC5D5C
+TX19    0x20000000      0xB03C0000      0x     888      0x44B7BDFE      0x7B3A4ED2
+TX20    0x20000000      0xB04C0000      0x     888      0x816E3A91      0xD80F3977
+TX21    0x20000000      0xB05C0000      0x     888      0xBA07D3BE      0xEA9EDF21
+TX22    0x20000000      0xB06C0000      0x     888      0x9D674A29      0x785D6F99
+TX23    0x20000000      0xB07C0000      0x     888      0xE0771CDE      0xCF6DB7AF
+TX24    0x20000000      0xB08C0000      0x     888      0xC1B496EA      0x2925FA46
+TX25    0x20000000      0xB09C0000      0x     888      0x7ECA02D1      0x7926841E
+TX26    0x20000000      0xB0AC0000      0x     888      0x93DA1171      0x303F73A1
+TX27    0x20000000      0xB0BC0000      0x     888      0x8EF6DDFA      0xB57BB97A
+TX28    0x20000000      0xB0CC0000      0x     888      0x997DD4AE      0xF37C1D12
+TX29    0x20000000      0xB0DC0000      0x     888      0xEB9C0E9F      0x3FB58A21
+TX30    0x20000000      0xB0EC0000      0x     888      0x191C32E2      0xD04C6958
+TX31    0x20000000      0xB0FC0000      0x     888      0x4A20E99D      0x7425BB88
+
+CAN REG
+
+Where
+
+MB - mailbox name
+MID - mailbox message ID
+MCF - message control field
+MDH - message data high word
+MDL - message data low word
+LAM - local area mask
+MOTS - message object timestamp
+
+4. Obtain the message ID (MID) for a given device
+
+# canctl -u1,rx0 -M
+GET_MID = 0x100C0000
+# canctl -u1,rx8 -M
+GET_MID = 0x108C0000
+# canctl -u1,tx17 -M
+GET_MID = 0x101C0000 
+
+5. Set a new MID for a TX and a RX device
+
+# canctl -u1,rx9 -m0x11CC0000
+# canctl -u1,tx30 -m0x11CC0000
+
+6. Verify the new MID's
+
+# canctl -u1,rx9 -M
+GET_MID = 0x11CC0000
+# canctl -u1,tx30 -M
+GET_MID = 0x11CC0000
+
+NOTE: "canctl -u1 -d" could also be used for debug purposes
+
+7. Verify TX and RX devices can communicate using the new MID
+
+# echo testing > /dev/can1/tx30
+# cat /dev/can1/rx9
+testing
+<ctrl+c>
+
+8. Restart driver with different starting MID values
+
+# slay dev-can-am335x
+# dev-can-am335x -t -i 0x1A0C0000,0x1A0C0000 can1
+
+9. Read non-default MID values
+
+# canctl -u1,rx0 -M
+GET_MID = 0x1A0C0000
+# canctl -u1,rx1 -M
+GET_MID = 0x1A1C0000
+# canctl -u1,tx16 -M
+GET_MID = 0x1A0C0000
+
+NOTE: "canctl -u1 -d" could also be used for debug purposes
+
+10. Verify TX/RX still work with new MID's
+
+# echo testing > /dev/can1/tx16
+# cat /dev/can1/rx0
+testing
+<ctrl+c>
+
+
+*************************************************
+    Extended MID's
+*************************************************
+Standard 11 bit MID's - bits 18-28 define the MID
+Extended 29 bit MID's - bits  0-28 define the MID
+First, verify that extended MID's are disabled in the default configuration.
+Then, restart the driver with extended MID's and verify operation.
+
+1. Start the CAN driver with its default MID's
+
+# slay dev-can-am335x
+# dev-can-am335x -t can1
+
+2. Set invalide extended MID's for two RX devices and one TX device
+
+# canctl -u1,rx6 -m0x10080002
+# canctl -u1,rx5 -m0x10080001
+# canctl -u1,tx22 -m0x10080002
+
+3. Transmit a CAN message from the TX device with the invalid extended MID
+
+# echo testing > /dev/can1/tx22
+
+4. Determine which device received the CAN message
+
+# cat /dev/can1/rx6
+<ctrl+c>
+
+# cat /dev/can1/rx5
+testing
+<ctrl+c>
+
+RX5 received the CAN message even though its MID does not match that of TX22.
+Because the extended MID's are ignored, the device hardware treats RX5 and RX6
+as having the the same MID (the lower 18 bits are ignored) and the message is 
+filtered to the highest priority device. (Among the message interrupts, the 
+message object's interrupt priority decreases with increasing message number,
+ie RX0 has a higher priority than RX1..RX31, etc.)
+
+Extended Frame: MID[28:0 ] 29-bit identifier
+Standard Frame: MID[28:18] 11-bit identifier
+
+5. Restart the device with the extended MID option
+
+# slay dev-can-am335x
+# dev-can-am335x -t -x can1
+
+6. Set valid extended MID's for two RX devices and one TX device
+
+# canctl -u1,rx6 -m0x10080002
+# canctl -u1,rx5 -m0x10080001
+# canctl -u1,tx22 -m0x10080002
+
+7. Send a DEBUG devctl to the driver to show the MID's. 
+
+# canctl -u1 -d
+
+CAN REG
+
+****************************************************************************
+AM335X_DCAN_CTL      = 0x   2148E  AM335X_DCAN_ES_EOI   = 0x       7
+AM335X_DCAN_ERRC     = 0x       0  AM335X_DCAN_BTR      = 0x   31803
+AM335X_DCAN_INT      = 0x       0  AM335X_DCAN_TEST     = 0x      10
+AM335X_DCAN_PERR     = 0x     400  AM335X_DCAN_ABOTR    = 0x       0
+AM335X_DCAN_TXRQ_X   = 0x       0  AM335X_DCAN_TXRQ12   = 0x       0
+AM335X_DCAN_TXRQ34   = 0x       0  AM335X_DCAN_TXRQ56   = 0x       0
+AM335X_DCAN_TXRQ78   = 0x       0  AM335X_DCAN_NWDAT_X  = 0x       0
+AM335X_DCAN_NWDAT12  = 0x       0  AM335X_DCAN_NWDAT34  = 0x       0
+AM335X_DCAN_NWDAT56  = 0x       0  AM335X_DCAN_NWDAT78  = 0x       0
+AM335X_DCAN_INTPND_X = 0x       0  AM335X_DCAN_INTPND12 = 0x       0
+AM335X_DCAN_INTPND34 = 0x       0  AM335X_DCAN_INTPND56 = 0x       0
+AM335X_DCAN_INTPND78 = 0x       0  AM335X_DCAN_MSGVAL_X = 0x       F
+AM335X_DCAN_MSGVAL12 = 0xFFFFFFFF  AM335X_DCAN_MSGVAL34 = 0x       0
+AM335X_DCAN_MSGVAL56 = 0x       0  AM335X_DCAN_MSGVAL78 = 0x       0
+AM335X_DCAN_INTMUX12 = 0x       0  AM335X_DCAN_INTMUX34 = 0x       0
+AM335X_DCAN_INTMUX56 = 0x       0  AM335X_DCAN_INTMUX78 = 0x       0
+AM335X_DCAN_IF1CMD   = 0x  A00017  AM335X_DCAN_IF2CMD   = 0x       1
+AM335X_DCAN_IF1MSK   = 0xA0000000  AM335X_DCAN_IF2MSK   = 0xFFFFFFFF
+AM335X_DCAN_IF1ARB   = 0xF0080002  AM335X_DCAN_IF2ARB   = 0x       0
+AM335X_DCAN_IF1MCTL  = 0x     A88  AM335X_DCAN_IF2MCTL  = 0x       0
+AM335X_DCAN_IF1DATA  = 0x4A20E99F  AM335X_DCAN_IF1DATB  = 0x7425B988
+AM335X_DCAN_IF2DATA  = 0x       0  AM335X_DCAN_IF2DATB  = 0x       0
+AM335X_DCAN_IF3OBS   = 0x       0  AM335X_DCAN_IF3MSK   = 0xFFFFFFFF
+AM335X_DCAN_IF3ARB   = 0x       0  AM335X_DCAN_IF3MCTL  = 0x       0
+AM335X_DCAN_IF3DATA  = 0x       0  AM335X_DCAN_IF3DATB  = 0x       0
+AM335X_DCAN_IF3UPD12 = 0x       0  AM335X_DCAN_IF3UPD56 = 0x       0
+AM335X_DCAN_IF3UPD78 = 0x       0  AM335X_DCAN_IF3UPD78 = 0x       0
+AM335X_DCAN_TIOC     = 0x   4000E  AM335X_DCAN_RIOC     = 0x   40008
+****************************************************************************
+
+Mailboxes
+RX Mailboxes
+MB      MASK            ARB             MCTRL           MDL             MDH
+==================================================================================
+RX0     0xA0000000      0xD00C0000      0x     688      0x74657374      0x696E670A
+RX1     0xA0000000      0xD01C0000      0x     688      0x5E36E6F9      0xF335A2FF
+RX2     0xA0000000      0xD02C0000      0x     688      0xCF7EECD8      0x21A0485E
+RX3     0xA0000000      0xD03C0000      0x     688      0xF48B1BF1      0x4356A3F6
+RX4     0xA0000000      0xD04C0000      0x     688      0x28A8D768      0x4DF68280
+RX5     0xA0000000      0xD0080001      0x     688      0x74657374      0x696E670A
+RX6     0xA0000000      0xD0080002      0x     688      0xB77E8ABE      0xB894A7D8
+RX7     0xA0000000      0xD07C0000      0x     688      0xC1DF510E      0x20AC4D0D
+RX8     0xA0000000      0xD08C0000      0x     688      0x712A6E3A      0xF31EB233
+RX9     0xA0000000      0xD09C0000      0x     688      0x74657374      0x696E670A
+RX10    0xA0000000      0xD0AC0000      0x     688      0x74657374      0x696E670A
+RX11    0xA0000000      0xD0BC0000      0x     688      0x 6BD250D      0xDDD7F7BC
+RX12    0xA0000000      0xD0CC0000      0x     688      0x9B30867F      0xE0BB23D9
+RX13    0xA0000000      0xD0DC0000      0x     688      0x79999945      0x58C51EE3
+RX14    0xA0000000      0xD0EC0000      0x     688      0x81DE2C4D      0x2DF83891
+RX15    0xA0000000      0xD0FC0000      0x     688      0x E6C9E80      0xD25BF5E1
+
+TX Mailboxes
+MB      MASK            ARB             MCTRL           MDL             MDH
+==================================================================================
+TX16    0xA0000000      0xF00C0000      0x     A88      0x74657374      0x696E670A
+TX17    0xA0000000      0xF01C0000      0x     A88      0xAF414607      0x 5B12892
+TX18    0xA0000000      0xF02C0000      0x     A88      0xFF3C5B68      0x60AC5D5E
+TX19    0xA0000000      0xF03C0000      0x     A88      0x74657374      0x696E670A
+TX20    0xA0000000      0xF04C0000      0x     A88      0x 16E2A91      0xD90F3937
+TX21    0xA0000000      0xF05C0000      0x     A88      0xFA47D3BE      0xEA9EDFA1
+TX22    0xA0000000      0xF0080002      0x     A88      0x74657374      0x696E670A
+TX23    0xA0000000      0xF07C0000      0x     A88      0xE8760CDE      0xCF6DB7AE
+TX24    0xA0000000      0xF08C0000      0x     A88      0xC53496EA      0x2925FA46
+TX25    0xA0000000      0xF09C0000      0x     A88      0x7ECA0291      0x7926941A
+TX26    0xA0000000      0xF0AC0000      0x     A88      0x93DA1171      0x303F72E1
+TX27    0xA0000000      0xF0BC0000      0x     A88      0x8E76DDFA      0xB57BB978
+TX28    0xA0000000      0xF0CC0000      0x     A88      0x995FD4AE      0xFB7C1D12
+TX29    0xA0000000      0xF0DC0000      0x     A88      0xEB9C4E9F      0x3FF58A21
+TX30    0xA0000000      0xF0EC0000      0x     A88      0x74657374      0x696E670A
+TX31    0xA0000000      0xF0FC0000      0x     A88      0x4A20E99F      0x7425B988
+
+
+NOTE: Identifier Extension Bit(CANMID[IDE]) has been set for Extended identifier.
+ 
+8. Transmit a CAN message from the TX device with the valid extended MID
+
+# echo testing > /dev/can1/tx22
+
+9. Determine which device received the CAN message
+
+# cat /dev/can1/rx5
+<ctrl+c>
+
+# cat /dev/can1/rx6
+testing
+<ctrl+c>
+
+RX6 received the CAN message because extended MID's are enabled and its MID
+exactly matches the MID of TX22.
+
+
+*************************************************
+    Extended CAN Message Data
+*************************************************
+In addition to the CAN message data payload, additional information can be 
+provided with each received CAN message.  This feature must be enabled on driver
+startup.  In addition, the extended information is only available through a devctl.
+
+1. Start the driver with extended CAN message information enabled
+
+# slay dev-can-am335x
+# dev-can-am335x -t -M can1
+
+2. Transmit two CAN messages
+
+# echo tstdat1 > /dev/can1/tx16
+# echo tstdat2 > /dev/can1/tx16
+
+3. Read the CAN messages with extended information
+
+# canctl -u1,rx0 -r
+READ_CANMSG_EXT:
+mid = 0x100C0000
+timestamp = 0xE74
+dat len = 8
+dat = tstdat1
+
+# canctl -u1,rx0 -r
+READ_CANMSG_EXT:
+mid = 0x100C0000
+timestamp = 0xE79
+dat len = 8
+dat = tstdat2
+
+NOTE: Unlike the "cat" utility, "canctl" only reads 1 messages and then exits.
+
+4. Run the canctl utility to block until another CAN message is received
+
+# canctl -u1,rx0 -r &
+
+5. Transmit another CAN message
+
+# echo tstdat3 > /dev/can1/tx16
+
+The canctl utility unblocks and prints out the data.
+
+# READ_CANMSG_EXT:
+mid = 0x100C0000
+timestamp = 0xF16
+dat len = 8
+dat = tstdat3
+
+6. Verify that normal reads work as normal
+
+# cat /dev/can1/rx0 &
+
+# echo testing > /dev/can1/tx16
+testing
+
+# echo testing > /dev/can1/tx16
+testing
+
+NOTE: When CAN messages are consume via a normal read, the extended information is discarded.
+
+
+*************************************************
+    CAN Message Timestamps
+*************************************************
+The current CAN device timestamp value can be read and set by
+devctls.  In addition, the intitial timestamp value can be set
+on driver init.
+
+1. Start the CAN driver with an initial timestamp (and extended message info)
+
+# slay dev-can-am335x
+# dev-can-am335x -t -m0x123456 -M can1
+
+2. Get the current timestamp
+
+# canctl -u1 -T
+GET_TIMESTAMP = 0x1BD9FC
+# canctl -u1 -T
+GET_TIMESTAMP = 0x1CBB5D
+# canctl -u1 -T
+GET_TIMESTAMP = 0x1D1D07
+
+3. Set a new timestamp
+
+# canctl -u1 -t0xAAAAAA
+
+# canctl -u1 -T
+GET_TIMESTAMP = 0xAAEBEC
+
+4. Transmit a CAN message and read the received message with extened information
+
+# echo testing > /dev/can1/tx16
+
+# canctl -u1,rx0 -r
+READ_CANMSG_EXT:
+mid = 0x100C0000
+timestamp = 0xAED57A
+dat len = 8
+dat = testing
+
+NOTE: The message's timestamp is relative to the value set via the devctl.
+
+
+*************************************************
+    CAN Transmit Message Priorities
+*************************************************
+Priorities can be associated with CAN transmit messages.  The hardware uses these
+priorities to determine which CAN message to transmit first if there are multiple
+messages waiting to be transmitted.  The default priorities of all devices is 0 and
+can be modified by devctls.
+
+1. Start the CAN driver
+
+# slay dev-can-am335x
+# dev-can-am335x -t can1
+
+2. Read the current priorities
+
+# canctl -u1,tx16 -P
+GET_PRIO = 16
+
+# canctl -u1,tx17 -P
+GET_PRIO = 15
+
+# canctl -u1,rx1 -P
+GET_PRIO = 31
+
+With the AM335x, message objects have a fixed priority. The Message Object 1 (ie RX0) 
+has the highest priority. The last message object has the lowest priority.
+
+3. Set a new device priority
+
+# canctl -u1,tx16 -p5
+
+# Unable to change priority. The receive/transmit priority for the message objects
+ is fixed.
+
+
+*************************************************
+    CAN Receive Message Filtering 
+*************************************************
+The filtering provided by the message ID's (MID) can be further modified by using
+a mask.  See the AM335x DCAN specification documentation. The mask specificies which 
+bits in the MID are to be ignored. By default, the mask is disabled, but it can be 
+enabled and modified by use of a devctl.
+
+1. Start the driver with extended MID's enabled
+
+# slay dev-can-am335x
+# dev-can-am335x -t -x can1
+
+2. Get initial mask values
+
+# canctl -u1,rx0 -F
+MFILTER = 0x0
+
+# canctl -u1,rx1 -F
+MFILTER = 0x0
+
+# canctl -u1,tx31 -F
+MFILTER = 0x0
+
+3. Get initial MID values
+
+# canctl -u1,rx0 -M
+GET_MID = 0x100C0000
+
+# canctl -u1,rx1 -M
+GET_MID = 0x101C0000
+
+# canctl -u1,tx31 -M
+GET_MID = 0x100C0000
+
+4. Set new MID values for rx0, rx1 and tx35
+
+# canctl -u1,rx0 -m0x100C0001
+# canctl -u1,rx1 -m0x100C0002
+# canctl -u1,tx31 -m0x100C0002
+
+# canctl -u1,rx0 -M
+GET_MID = 0x100C0001
+
+# canctl -u1,rx1 -M
+GET_MID = 0x100C0002
+
+# canctl -u1,tx31 -M
+GET_MID = 0x100C0002
+
+5. Transmit a CAN message from tx31
+
+# echo testing > /dev/can1/tx31
+
+6. Determine which RX device received that message
+
+# cat /dev/can1/rx0
+<ctrl+c>
+
+# cat /dev/can1/rx1
+testing
+<ctrl+c>
+
+RX1 received the message because its MID exactly matched the MID of TX31
+
+7. Set the LAM filter on RX0 and RX1
+
+# canctl -u1,rx0 -f0xFFFFFFF0
+# canctl -u1,rx1 -f0xFFFFFFF0
+
+8. Transmit a CAN message from tx31
+
+echo testing > /dev/can1/tx31
+
+9. Determine which RX device received that message
+
+# cat /dev/can1/rx1
+<ctrl+c>
+
+# cat /dev/can1/rx0
+testing
+
+RX0 and RX1 now appear to have the same MID since the last nibble is now
+ignored for both devices because they have the last nibble of the LAM filter cleared.
+Therefore, RX0 received the message because it is the first message buffer with 
+the most matching MID bits. 
+
+
+
+*************************************************
+    CAN Device Errors
+*************************************************
+An error devctl can be sent to a CAN device to obtain driver specific error information
+(each driver will return error data that must be interpretted specifically for that
+device).  In the case of dev-can-am335x, the error devctl returns the current status
+of the DCAN Error and Status Register (DCAN ES). It also returns the last recorded
+DCAN Error and Status Register (DCAN ES) value by the interrupt routine, eg the error
+and status at the time of the most recent received message.
+
+1. Start the driver on DCAN1 with no loopback in order that bus errors can be generated
+
+# slay dev-can-am335x
+# dev-can-am335x can1
+
+2. Send the error devctl to read the error status
+
+# canctl -u1 -e
+ERROR drvr1 = 0x7
+ERROR drvr2 = 0x0
+
+drvr1: DCAN_ES register
+drvr2: processed DCAN_ES register as per most recent message receive (interrupt)
+       See bit-definitions AM335X_DCAN_ERR_XXXX in canam335x.h 
+
+NOTE: The value of drvr2 is cleared after reading.  Reading a second time produces
+
+# canctl -u1 -e
+ERROR drvr1 = 0x7
+ERROR drvr2 = 0x0
+
+NOTE: Refer to the AM335x DCAN documentation for interpretation of the DCAN_ES 
+bit values.
+
+
+*************************************************
+    CAN Operation Between 2 AM335x EVM Boards
+*************************************************
+The AM335x EVM boards have a CAN connector pair(J15 and J36) on application board. If two
+boards are connected via this interface, they communicate via the CAN bus.
+
+1. Start the CAN driver on AM335x EVM board #1
+
+# dev-can-am335x can1
+
+2. Start the CAN driver on AM335x EVM board #2
+
+# dev-can-am335x can1
+
+3. With the default configuration, the MID's of both drivers running on the two boards
+should correspond:
+
+Device Mailbox  MID
+============================
+RX0/TX16        0x100C0000
+RX1/TX17        0x101C0000
+RX2/TX18        0x102C0000
+RX3/TX19        0x103C0000
+RX4/TX20        0x104C0000
+RX5/TX21        0x105C0000
+RX6/TX22        0x106C0000
+RX7/TX23        0x107C0000
+RX8/TX24        0x108C0000
+RX9/TX25        0x109C0000
+RX10/TX26       0x10AC0000
+RX11/TX27       0x10BC0000
+RX12/TX28       0x10CC0000
+RX13/TX29       0x10DC0000
+RX14/TX30       0x10EC0000
+RX15/TX31       0x10FC0000
+
+Therefore, messages transmitted from the TX device of one board will be received by the
+RX device of the second board with the matching MID.
+
+4. Run a client application to read CAN messages on the first receive mailbox of
+AM335x EVM board #1
+
+# cat /dev/can1/rx0 &
+
+5. Transmit a CAN message from AM335x EVM board #2 with a matching MID
+
+# echo testing > /dev/can1/tx16
+
+6. The client aplication on AM335x EVM board #1 should recieve the message
+
+testing
+
+7. To run a stress test on the CAN bus, continually tranmsit messages from AM335x EVM
+board #2
+
+# while true
+> do
+> echo testing > /dev/can1/tx16
+> done
+
+8. The client application on AM335x EVM board #1 should recieve the messages
+
+testing
+testing
+testing
+testing
+testing
+testing
+.
+.
+.
+testing
+testing
+testing
+testing
+testing
+testing
+testing
+
+<ctrl+c> on AM335x EV board #2 to stop
+
+9. All other tests under the General Operation/Loopback Testing should apply.
+
+10. The CAN bus bitrates can be changed with predefined bitrate options
+passed to the driver. Restart the driver on AM335x EVM board #1 with a new bitrate
+
+# slay dev-can-am335x
+# dev-can-am335x -b20K can1
+# cat /dev/can1/rx0 &
+
+11. Attempt to transmit a message from AM335x EVM board #2
+
+# echo testing > /dev/can1/tx16
+
+12. Verify no CAN message were received by board #1
+
+13. Restart the driver on AM335x EVM board #2 with a new bitrate
+
+# slay dev-can-am335x
+# dev-can-am335x -b20K can1
+ 
+14. Transmit a message from AM335x EVM board #2
+
+# echo testing > /dev/can1/tx16
+
+15. Verify the CAN message is received by board #1
+
+16. Non-predefined bitrates also be configured using the "-B" option by
+passing the values calculated according the equations in the AM335x HECC
+documenation.
